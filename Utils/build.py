@@ -8,12 +8,6 @@ import torch.nn as nn
         - layer_description: Description of the layer in the specified format
     Returns: A list that represents the described Layer
 """
-""" Dada una descripción de la capa (En el formato especificado en el archivo NOMBRE DEL ARCHIVO)
-    construye la misma en pytorch
-    Parámetros:
-        - layer_description: Descripción de la capa en el formato especificado
-    Retorna: Una lista que contiene los elementos que conforman la capa
-"""
 def make_layer(layer_description):
 
     if layer_description['activation'] == "relu":
@@ -38,12 +32,6 @@ def make_layer(layer_description):
         - structure: Description of the network architecture in the specified format
     Returns: A nn.Sequential instance that represents the described network
 
-"""
-""" Dada la especificación de una arquitectura (En el formato detallado en el archivo NOMBRE DEL
-    ARCHIVO) construye la misma en pytorch
-    Parámetros:
-        - architecture: Descripción de la estructura de la red en el formato especificado
-    Retorna: Un objeto de clase nn.Sequential que representa la red especificada  
 """
 def build_model(architecture):
 
