@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from Utils.utils import build_model
+from Utils.build import build_model
 
 """ This class represents a multilayer perceptron. It is not a generic one
     the forward method is specifically designed to concatenate the results
