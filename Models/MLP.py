@@ -7,7 +7,7 @@ from Utils.build import build_model
     the forward method is specifically designed to concatenate the results
     from different modalities before beginning forward propagation 
 """
-class MLP(nn.module):
+class MLP(nn.Module):
 
     """ Initialization method
         Parameters:
@@ -15,10 +15,11 @@ class MLP(nn.module):
             - net_structure: Structure of the desired MLP, formatted according to
             the specification in (FILE NAME)
     """
-    def __init__(self, device, net_structure):
+    def __init__(self, device, name, net_structure):
         super(MLP, self).__init__()
 
         self.device = device
+        self.name = name
         self.layers = build_model(net_structure)
 
     """ Forward propagation method. This forward method is specifically designed to work 
@@ -31,4 +32,3 @@ class MLP(nn.module):
 
         concatenated_input = torch.cat(tuple([input_list[i] for i in range(len(input_list))]), dim=1)
         return self.layers(concatenated_input)
-

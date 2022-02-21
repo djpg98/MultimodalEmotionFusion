@@ -17,7 +17,7 @@ def make_layer(layer_description):
                 in_features=layer_description['in_features'],
                 out_features=layer_description['neurons']    
             ),
-            nn.ReLU
+            nn.ReLU()
         ]
 
     elif layer_description['activation'] == 'softmax':
@@ -41,5 +41,5 @@ def build_model(architecture):
 
         layers += make_layer(layer_description)
 
-    return nn.Sequential(layers)
+    return nn.Sequential(*layers)
 

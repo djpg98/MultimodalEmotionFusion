@@ -4,7 +4,7 @@ import numpy as np
 import torch.nn.functional as F
 from torch.utils.data import Dataset
 
-#Esta clase es la que se utiliza para trabajar el dataset de IEMOCAP. La saqué del código de Juan Pablo
+#Esta clase es la que se utiliza para trabajar el dataset de IEMOCAP. La saqué del código de JuanPablo
 class DatasetIEMOCAP(Dataset):
     def __init__(self, classes, FaceR, AudioR, TextR, method='avg', mode='train', transform=None):
         super(DatasetIEMOCAP, self).__init__()
@@ -44,17 +44,17 @@ class DatasetIEMOCAP(Dataset):
         self.DataKeys = list(self.Data.keys())
   
     def convert(self, facial_data):
-        if self.Method[0] is 'a':
+        if self.Method[0] == 'a':
             facedata = np.mean(np.stack(facial_data), axis=0)
             facedata = np.expand_dims(facedata, 0)
             facedata = F.softmax(torch.from_numpy(facedata),dim=-1)
             facedata = facedata.numpy()
-        elif self.Method[0] is 'v':
+        elif self.Method[0] == 'v':
             mv = np.bincount(np.argmax(np.stack(facial_data),axis=1)).argmax()
             facedata = np.zeros(facedata[0].shape)
             facedata[mv] = 1.0
             # facedata = torch.from_numpy(facedata)
-        elif self.Method[0] is 'c':
+        elif self.Method[0] == 'c':
             # facedata = torch.from_numpy(np.concatenate(facial_data))
             facedata = np.concatenate(facial_data)
         
