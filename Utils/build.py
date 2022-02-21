@@ -12,7 +12,7 @@ def make_layer(layer_description):
 
     if layer_description['activation'] == "relu":
 
-        return [
+        return layer_description['repeat'] * [
             nn.Linear(
                 in_features=layer_description['in_features'],
                 out_features=layer_description['neurons']    
