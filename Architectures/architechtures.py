@@ -3,8 +3,8 @@
     format_specification.txt in this same directory
 """
 
-MLP = {
-    'test' : [
+MLP_ARCHITECTURES = {
+    'l3-l4' : [
         {
             'repeat': 1,
             'in_features': 12,

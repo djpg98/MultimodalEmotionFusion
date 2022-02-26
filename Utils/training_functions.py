@@ -14,7 +14,7 @@ from tqdm.notebook import tqdm
         - val_loss: List containing the loss for each validation performed during training. May be empty
         - val_acc: List containing the acc for each validation performed during training. May be empty
 """
-def save_results(model_name, train_loss, train_acc, val_loss, val_acc):
+def save_results(model_name, prefix, train_loss, train_acc, val_loss, val_acc):
 
     epochs = len(train_loss)
 
@@ -31,13 +31,13 @@ def save_results(model_name, train_loss, train_acc, val_loss, val_acc):
         results_acc = zip([i for i in range(1, epochs + 1)], train_acc)
 
 
-    with open(join('Results', 'Training_Data', f'results_{model_name}_loss.csv'), 'w') as loss_file:
+    with open(join('Results', prefix, 'Training Data', f'model_{model_name}_loss.csv'), 'w') as loss_file:
 
         writer = csv.writer(loss_file, delimiter=",")
         writer.writerow(header)
         writer.writerows(results_loss)
 
-    with open(join('Results', 'Training_Data', f'results_{model_name}_acc.csv'), 'w') as acc_file:
+    with open(join('Results', prefix, 'Training Data', f'model_{model_name}_acc.csv'), 'w') as acc_file:
 
         writer = csv.writer(acc_file, delimiter=",")
         writer.writerow(header)
@@ -53,7 +53,7 @@ def save_results(model_name, train_loss, train_acc, val_loss, val_acc):
         - save: If True it calls save_results function defined above
 
 """
-def train_mlp(model, train_dataloader, epochs, loss_function, optimizer, validation_dataloader=None, save=True):
+def train_mlp(model, learning_rate, train_dataloader, epochs, loss_function, optimizer, validation_dataloader=None, save=True):
 
     train_loss = []
     train_acc = []
@@ -122,4 +122,4 @@ def train_mlp(model, train_dataloader, epochs, loss_function, optimizer, validat
 
         if save:
 
-            save_results(model.name, train_loss, train_acc, val_loss, val_acc)
+            save_results(f'{model.name}_lr_{learning_rate}', 'mlp_simple', train_loss, train_acc, val_loss, val_acc)
