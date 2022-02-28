@@ -76,6 +76,8 @@ def train_mlp(model, learning_rate, train_dataloader, epochs, loss_function, opt
             optimizer.zero_grad()
             output_value = model(input_list)
             loss = loss_function(output_value, expected_value)
+            #print(expected_value)
+            #print(output_value)
             loss.backward()
             optimizer.step()
 
@@ -121,5 +123,7 @@ def train_mlp(model, learning_rate, train_dataloader, epochs, loss_function, opt
             print(f'epoch: {current_epoch}, train loss: {train_loss[-1]}, train acc: {train_acc[-1]}')
 
         if save:
-
-            save_results(f'{model.name}_lr_{learning_rate}', 'mlp_simple', train_loss, train_acc, val_loss, val_acc)
+            if learning_rate != 0:
+                save_results(f'{model.name}_lr_{learning_rate}', 'mlp_simple', train_loss, train_acc, val_loss, val_acc)
+            else:
+                save_results(f'{model.name}_adam', 'mlp_simple', train_loss, train_acc, val_loss, val_acc)

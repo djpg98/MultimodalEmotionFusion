@@ -22,5 +22,52 @@ MLP_ARCHITECTURES = {
         {
             'activation': 'softmax'
         }
+    ],
+
+    'l5-l4' : [
+        {
+            'repeat': 1,
+            'in_features': 12,
+            'neurons': 5,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 5,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        }
+    ],
+
+    '2l3-l4' : [
+        {
+            'repeat': 1,
+            'in_features': 12,
+            'neurons': 3,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 3,
+            'neurons': 3,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 3,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        }
     ]
 }
