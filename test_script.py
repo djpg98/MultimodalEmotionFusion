@@ -40,7 +40,8 @@ model = MLP(
 )
 
 BatchSize = 32
-loss_function = nn.CrossEntropyLoss()
+loss_function = nn.CrossEntropyLoss(weight=torch.tensor([0.8982412060301508,0.8100453172205438,1.2783075089392133,1.1495176848874598]))
+#loss_function = nn.CrossEntropyLoss()
 optimizer = Adam(model.parameters())#SGD(model.parameters(), lr=learning_rate)
 
 train_dataset = DatasetIEMOCAP(classes, face_data, audi_data,
@@ -55,7 +56,7 @@ train_dataloader = DataLoader(train_dataset,
 test_dataloader = DataLoader(test_dataset,
                              batch_size=BatchSize, collate_fn=my_collate)
 
-train_mlp(model, learning_rate, train_dataloader, 60, loss_function, optimizer, test_dataloader)
+train_mlp(model, learning_rate, train_dataloader, 200, loss_function, optimizer, test_dataloader)
 if learning_rate != 0:
     base_name = f'model_{model_name}_lr_{str(learning_rate).replace(".", "")}'
 else:

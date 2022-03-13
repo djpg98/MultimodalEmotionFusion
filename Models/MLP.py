@@ -30,5 +30,7 @@ class MLP(nn.Module):
     """
     def forward(self, input_list):
 
-        concatenated_input = torch.cat(tuple([input_list[i] for i in range(len(input_list))]), dim=1)
+        concatenated_input = torch.cat([input_list[i] for i in range(len(input_list))], dim=1)
         return self.layers(concatenated_input)
+
+
