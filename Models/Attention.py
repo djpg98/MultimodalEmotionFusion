@@ -1,20 +1,21 @@
-from turtle import forward
 import torch
 import torch.nn as nn
 
-from MLP import MLP
+from .MLP import MLP
 
 """ This multiplies a batch of samples from one mode with the corresponding batch of samples from another
     Softmax is applied to each row of the resulting attention matrix as suggested by Choi, Song, Lee, 2018
     If one of the samples is a vector of zeros, then the attention matrix returned is the identity matrix
 """
-class BimodalAttentionBlock(nn.modules):
+class BimodalAttentionBlock(nn.Module):
 
     """ Initialization method
         Parameters:
             - device: Device in which torch calculations will be performed    
     """
     def __init__(self, device):
+
+        super(BimodalAttentionBlock, self).__init__()
 
         self.device = device
 
@@ -37,7 +38,7 @@ class BimodalAttentionBlock(nn.modules):
         # array-like format, not exactly vectors that can be multiplied
         for sample in zip(input1, input2):
             #Check if one of the inputs is zero, if it is then append id matrix
-            if torch.is_nonzero(input1) and torch.is_nonzero(input2):
+            if not (torch.any(sample[0].bool()) or  torch.any(sample[1].bool())):
 
                 attention_list.append(
                     softmax_rows(torch.mul(
@@ -60,7 +61,7 @@ class BimodalAttentionBlock(nn.modules):
     given mode, we'll have more than one enriched version of that sample. These are fused with the method
     specified for the mode in method_list, so each sample in a given mode has only one enriched version
 """
-class BimodalAttentionSet(nn.modules):
+class BimodalAttentionSet(nn.Module):
 
     """ Initialization method
         Parameters:
@@ -73,6 +74,8 @@ class BimodalAttentionSet(nn.modules):
     """
     def __init__(self, number_of_modes, device, name, method_list):
 
+        super(BimodalAttentionSet, self).__init__()
+
         self.device = device
         self.name = name
         self.number_of_modes = number_of_modes
@@ -82,7 +85,7 @@ class BimodalAttentionSet(nn.modules):
         for i, j in self.combinations:
             setattr(self, f'attention_block_{i}_{j}', BimodalAttentionBlock(device))
 
-        for i in self.number_of_modes:
+        for i in range(self.number_of_modes):
             setattr(self, f'intra_fusion_{i}', method_list[i])
 
     """ Forward propagation method. This forward method is specifically designed to work 
@@ -97,34 +100,39 @@ class BimodalAttentionSet(nn.modules):
 
         for i, j in self.combinations:
 
-            matrix_dict[(i, j)] = getattr(self, f'AttentionBlock_{i}_{j}')(input_list[i], input_list[j])
+            matrix_dict[(i, j)] = getattr(self, f'attention_block_{i}_{j}')(input_list[i], input_list[j])
             matrix_dict[(j, i)] = torch.transpose(matrix_dict[(i, j)], 1, 2) #Transposes the matrix for each sample without altering the samples order
 
         results = []
 
-        for i in self.modes:
+        for i in range(self.number_of_modes):
 
             modality_with_attention = []
-            reshaped_input = torch.reshape(input_list[i], (input_list[i].shape[0], len(input_list[i]), 1))
-
-            for j in self.modes:
+            reshaped_input = torch.reshape(input_list[i], (input_list[i].shape[0], len(input_list[i][0]), 1))
+            new_dimensions = (reshaped_input.shape[0], reshaped_input.shape[1])
+            for j in range(self.number_of_modes):
 
                 if i != j:
 
                     modality_with_attention.append(
-                        torch.matmul(
-                            matrix_dict[(j, i)], 
-                            reshaped_input
+                        torch.reshape(
+                            torch.matmul(
+                                matrix_dict[(j, i)], 
+                                reshaped_input
+                            ),
+                            new_dimensions
                         )
                     )
 
-            results.append(getattr(self, f'intra_fusion_{i}')(modality_with_attention))
+            results.append(getattr(self, f'intra_fusion_{i}')(modality_with_attention)) #HERE IS THE PROBLEM
 
         return results
 
 class AttentionMLP(nn.Module):
 
     def __init__(self, number_of_modes, device, name, net_structure, method_list):
+
+        super(AttentionMLP, self).__init__()
 
         self.device = device
         self.name = name

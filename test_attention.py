@@ -8,8 +8,9 @@ import torch.nn as nn
 from torch.optim import Adam, SGD
 from torch.utils.data import DataLoader
 
-from Architectures.architechtures import MLP_ARCHITECTURES
+from Architectures.architechtures import ATTENTION_MLP_ARCHITECTURES
 from Datasets.IEMOCAP import DatasetIEMOCAP
+from Models.Attention import AttentionMLP
 from Models.MLP import MLP
 from Utils.dataloaders import my_collate
 from Utils.datasets import FusionTransformer
@@ -28,20 +29,53 @@ with open(audio_data, 'rb') as dic:
 with open(text_data, 'rb') as dic:
     text_data = pickle.load(dic)
 
+# IMPORTANT DO NOT FORGET: FOR NOW, FOR TESTING PURPOSES, ALL MLPS USED ARE
+# GOING TO BE USING THE SAME ARCHITECTURE.
 device = torch.device('cpu')
 model_name = sys.argv[1]
 learning_rate = float(sys.argv[2])
-net_structure = MLP_ARCHITECTURES[model_name]
 
-model = MLP(
+if (len(sys.argv) == 4 and sys.argv[3] == '-w'):
+    weight = True
+else:
+    weight = False
+
+try:
+    ATTENTION_MLP_ARCHITECTURES[model_name]
+except KeyError:
+    available_names = ", ".join(ATTENTION_MLP_ARCHITECTURES.keys())
+    print(f"Error: Specified model architecture does not exist. Try with one of the following: {available_names}")
+    sys.exit(-1)
+
+attention_net_structure = ATTENTION_MLP_ARCHITECTURES[model_name]['attention_fusion']
+multimodal_net_structure = ATTENTION_MLP_ARCHITECTURES[model_name]['multimodal_fusion']
+
+
+model_list = [
+    MLP(
+        device=device,
+        name = f'{model_name}_{i}',
+        net_structure=attention_net_structure
+    )
+
+    for i in range(3)
+]
+
+model = AttentionMLP(
+    number_of_modes=3, 
     device=device,
     name = model_name,
-    net_structure=net_structure
+    net_structure=multimodal_net_structure,
+    method_list=model_list
 )
 
 BatchSize = 32
-#loss_function = nn.CrossEntropyLoss(weight=torch.tensor([0.8982412060301508,0.8100453172205438,1.2783075089392133,1.1495176848874598]))
-loss_function = nn.CrossEntropyLoss()
+
+if weight:
+    loss_function = nn.CrossEntropyLoss(weight=torch.tensor([0.8982412060301508,0.8100453172205438,1.2783075089392133,1.1495176848874598]))
+else:
+    loss_function = nn.CrossEntropyLoss()
+
 optimizer = Adam(model.parameters())#SGD(model.parameters(), lr=learning_rate)
 
 train_dataset = DatasetIEMOCAP(classes, face_data, audi_data,
@@ -56,13 +90,14 @@ train_dataloader = DataLoader(train_dataset,
 test_dataloader = DataLoader(test_dataset,
                              batch_size=BatchSize, collate_fn=my_collate)
 
-train_mlp(model, learning_rate, train_dataloader, 200, loss_function, optimizer, 'mlp_simple', test_dataloader)
+train_mlp(model, learning_rate, train_dataloader, 60, loss_function, optimizer, 'attention_mlp', test_dataloader)
 if learning_rate != 0:
     base_name = f'model_{model_name}_lr_{str(learning_rate).replace(".", "")}'
 else:
     base_name = f'model_{model_name}_adam'
 
-results_path = join('Results', 'mlp_simple')
+results_path = join('Results', 'attention_mlp')
 torch.save(model.state_dict(), join('Saved Models', f'{base_name}.pth'))
 os.system(f'Rscript plots.R {results_path} {base_name}')
 os.system(f'rm Rplots.pdf')
+

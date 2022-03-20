@@ -69,5 +69,155 @@ MLP_ARCHITECTURES = {
         {
             'activation': 'softmax'
         }
+    ],
+
+    'l7-l4' : [
+        {
+            'repeat': 1,
+            'in_features': 12,
+            'neurons': 7,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 7,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        }        
+    ],
+
+    '2l7-l4' : [
+        {
+            'repeat': 1,
+            'in_features': 12,
+            'neurons': 7,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 7,
+            'neurons': 7,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 7,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        }    
+    ],
+
+    'l7-l3-l4' : [
+        {
+            'repeat': 1,
+            'in_features': 12,
+            'neurons': 7,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 7,
+            'neurons': 3,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 3,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+
+        {
+            'activation': 'softmax'
+        }    
+    ],
+
+    'l10-l4' : [
+        {
+            'repeat': 1,
+            'in_features': 12,
+            'neurons': 10,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 10,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+
+        {
+            'activation': 'softmax'
+        }    
     ]
+
+
+}
+
+INTRA_FUSION_MLP = {
+    'l7-l4' : [
+        {
+            'repeat': 1,
+            'in_features': 8,
+            'neurons': 7,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 7,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        }     
+    ],
+
+    'l12-l4' : [
+        {
+            'repeat': 1,
+            'in_features': 8,
+            'neurons': 12,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 12,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        } 
+    ]
+}
+
+ATTENTION_MLP_ARCHITECTURES = {
+    'l7a-l10f' : {
+        'attention_fusion': INTRA_FUSION_MLP['l7-l4'],
+        'multimodal_fusion': MLP_ARCHITECTURES['l10-l4']
+    },
+
+    'l12a-l10f' : {
+        'attention_fusion': INTRA_FUSION_MLP['l12-l4'],
+        'multimodal_fusion': MLP_ARCHITECTURES['l10-l4']        
+    }
 }

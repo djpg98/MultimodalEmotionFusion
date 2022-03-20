@@ -53,7 +53,7 @@ def save_results(model_name, prefix, train_loss, train_acc, val_loss, val_acc):
         - save: If True it calls save_results function defined above
 
 """
-def train_mlp(model, learning_rate, train_dataloader, epochs, loss_function, optimizer, validation_dataloader=None, save=True):
+def train_mlp(model, learning_rate, train_dataloader, epochs, loss_function, optimizer, fusion_type, validation_dataloader=None, save=True):
 
     train_loss = []
     train_acc = []
@@ -124,6 +124,6 @@ def train_mlp(model, learning_rate, train_dataloader, epochs, loss_function, opt
 
         if save:
             if learning_rate != 0:
-                save_results(f'{model.name}_lr_{learning_rate}', 'mlp_simple', train_loss, train_acc, val_loss, val_acc)
+                save_results(f'{model.name}_lr_{learning_rate}', fusion_type, train_loss, train_acc, val_loss, val_acc)
             else:
-                save_results(f'{model.name}_adam', 'mlp_simple', train_loss, train_acc, val_loss, val_acc)
+                save_results(f'{model.name}_adam', fusion_type, train_loss, train_acc, val_loss, val_acc)
