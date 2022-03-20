@@ -8,7 +8,7 @@ import torch.nn as nn
 from torch.optim import Adam, SGD
 from torch.utils.data import DataLoader
 
-from Architectures.architechtures import ATTENTION_MLP_ARCHITECTURES
+from Architectures.architectures import ATTENTION_MLP_ARCHITECTURES
 from Datasets.IEMOCAP import DatasetIEMOCAP
 from Models.Attention import AttentionMLP
 from Models.MLP import MLP
@@ -44,7 +44,7 @@ try:
     ATTENTION_MLP_ARCHITECTURES[model_name]
 except KeyError:
     available_names = ", ".join(ATTENTION_MLP_ARCHITECTURES.keys())
-    print(f"Error: Specified model architecture does not exist. Try with one of the following: {available_names}")
+    print(f"Error: Specified model architecuture does not exist. Try with one of the following: {available_names}")
     sys.exit(-1)
 
 attention_net_structure = ATTENTION_MLP_ARCHITECTURES[model_name]['attention_fusion']

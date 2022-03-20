@@ -1,7 +1,7 @@
 import os
 import sys
 
-import Architectures.architechtures as architectures
+import Architectures.architectures as architectures
 
 #For now, the only method available is mlp_simple
 method = sys.argv[1]

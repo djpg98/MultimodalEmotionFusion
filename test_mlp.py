@@ -8,7 +8,7 @@ import torch.nn as nn
 from torch.optim import Adam, SGD
 from torch.utils.data import DataLoader
 
-from Architectures.architechtures import MLP_ARCHITECTURES
+from Architectures.architectures import MLP_ARCHITECTURES
 from Datasets.IEMOCAP import DatasetIEMOCAP
 from Models.MLP import MLP
 from Utils.dataloaders import my_collate
@@ -31,6 +31,19 @@ with open(text_data, 'rb') as dic:
 device = torch.device('cpu')
 model_name = sys.argv[1]
 learning_rate = float(sys.argv[2])
+
+if (len(sys.argv) == 4 and sys.argv[3] == '-w'):
+    weight = True
+else:
+    weight = False
+
+try:
+    MLP_ARCHITECTURES[model_name]
+except KeyError:
+    available_names = ", ".join(MLP_ARCHITECTURES.keys())
+    print(f"Error: Specified model architechture does not exist. Try with one of the following: {available_names}")
+    sys.exit(-1)
+    
 net_structure = MLP_ARCHITECTURES[model_name]
 
 model = MLP(

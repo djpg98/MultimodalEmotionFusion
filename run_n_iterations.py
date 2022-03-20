@@ -12,7 +12,7 @@ METHOD_SCRIPTS = {
 INSTRUCTIONS:
     This script requires three arguments and has an optional one:
     - method: Fusion method to be used
-    - architechture: Fusion architechture to be used (Available architectures are listed at Architechtures/architechtures.py)
+    - architechture: Fusion architechture to be used (Available architectures are listed at Architectures/architectures.py)
     - iterations: Number of iterations
     - weighted (Optional): If passed a Weighted loss function is used (Pass "-w" as the last argument).  
 """
@@ -34,7 +34,6 @@ if (len(sys.argv) == 5 and sys.argv[4] == '-w'):
 else:
     directory = 'unweighted'
     weight = False
-
 
 # These are the paths where results and saved models will be saved at first
 original_plots_path = join('Results', method, 'Plots')
@@ -97,10 +96,3 @@ for i in range(iterations):
             join(original_saved_models_path, f'{base_name}.pth'),
             join(saved_models_path, f'{base_name}_{suffix}.pth')
         )
-
-
-
-
-
-
-
