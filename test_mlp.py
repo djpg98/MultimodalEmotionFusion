@@ -53,8 +53,12 @@ model = MLP(
 )
 
 BatchSize = 32
-#loss_function = nn.CrossEntropyLoss(weight=torch.tensor([0.8982412060301508,0.8100453172205438,1.2783075089392133,1.1495176848874598]))
-loss_function = nn.CrossEntropyLoss()
+
+if weight:
+    loss_function = nn.CrossEntropyLoss(weight=torch.tensor([0.8982412060301508,0.8100453172205438,1.2783075089392133,1.1495176848874598]))
+else:
+    loss_function = nn.CrossEntropyLoss()
+    
 optimizer = Adam(model.parameters())#SGD(model.parameters(), lr=learning_rate)
 
 train_dataset = DatasetIEMOCAP(classes, face_data, audi_data,

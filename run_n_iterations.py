@@ -1,6 +1,5 @@
 import os
 import sys
-
 from os.path import join, exists
 
 METHOD_SCRIPTS = {
@@ -10,16 +9,18 @@ METHOD_SCRIPTS = {
 
 """
 INSTRUCTIONS:
-    This script requires three arguments and has an optional one:
+    This script requires four arguments and has an optional one:
     - method: Fusion method to be used
     - architechture: Fusion architechture to be used (Available architectures are listed at Architectures/architectures.py)
-    - iterations: Number of iterations
-    - weighted (Optional): If passed a Weighted loss function is used (Pass "-w" as the last argument).  
+    - start: First iteration number
+    - end: Last iteration number
+    - weighted (Optional): If passed a Weighted loss function is used (Pass "-w" as the last argument). 
 """
 
 method = sys.argv[1]
 architechture = sys.argv[2]
-iterations = int(sys.argv[3])
+iterations_start = int(sys.argv[3])
+iterations_end = int(sys.argv[4])
 
 if method not in METHOD_SCRIPTS.keys():
     formated_method_list = ", ".join(METHOD_SCRIPTS.keys())
@@ -28,7 +29,7 @@ if method not in METHOD_SCRIPTS.keys():
 
 script = METHOD_SCRIPTS[method]
 
-if (len(sys.argv) == 5 and sys.argv[4] == '-w'):
+if (len(sys.argv) == 6 and sys.argv[5] == '-w'):
     directory = 'weighted'
     weight = True
 else:
@@ -54,7 +55,7 @@ if not exists(data_path):
 if not exists(saved_models_path):
     os.makedirs(saved_models_path)
 
-for i in range(iterations):
+for i in range(iterations_start, iterations_end):
 
     if weight:
         status = os.system(f"python {script} {architechture} 0 -w")
