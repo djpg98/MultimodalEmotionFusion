@@ -9,7 +9,7 @@ from .MLP import MLP
 """
 class BimodalAttentionBlock(nn.Module):
 
-    """ Initialization method
+    """ Class constructor
         Parameters:
             - device: Device in which torch calculations will be performed    
     """
@@ -57,13 +57,13 @@ class BimodalAttentionBlock(nn.Module):
         return attention_matrix
 
 """ For every pair of modes, it calculates the attention matrix and uses these matrixes to enrich each modes' 
-    input (Similar to Choi, Song, Lee, 2018). If there are more than two modes, then for each sample in a
+    features (Similar to Choi, Song, Lee, 2018). If there are more than two modes, then for each sample in a
     given mode, we'll have more than one enriched version of that sample. These are fused with the method
     specified for the mode in method_list, so each sample in a given mode has only one enriched version
 """
 class BimodalAttentionSet(nn.Module):
 
-    """ Initialization method
+    """ Class constructor
         Parameters:
             - number_of_modes: Number of modalities to consider
             - device: Device in which torch calculations will be performed
@@ -128,8 +128,22 @@ class BimodalAttentionSet(nn.Module):
 
         return results
 
+""" This method is a MLP Classifier that uses the attention mechanism implemented in BimodalAttentionSet in
+    order to attemt an improvement in the classification results. It is called AttentionMLP because it uses
+    a MLP to make the final classification of the data
+"""
 class AttentionMLP(nn.Module):
 
+    """ Class constructor
+        Parameters:
+            - number_of_modes: Number of modalities to be considered
+            - device: Device in which torch calculations will be performed
+            - name: Network name
+            - net_structure: Structure of the MLP that will be used to classify the features obtained
+              by the BimodalAttentionSet
+            - method_list: List which contains the fusion methods that are going to be used in the 
+              BimodalAttentionSet to combine the results of different enrriched samples of the same sample
+    """
     def __init__(self, number_of_modes, device, name, net_structure, method_list):
 
         super(AttentionMLP, self).__init__()
@@ -150,6 +164,12 @@ class AttentionMLP(nn.Module):
             net_structure=net_structure
         )
 
+    """ Forward propagation method. This forward method is specifically designed to work 
+        with the results of multiple modalities as input
+        Parameters:
+            - input_list: List containing the results from each modality
+        Returns: The output of the MLP
+    """
     def forward(self, input_list):
 
         input_with_attention = self.bimodal_attention_set(input_list)

@@ -46,3 +46,13 @@ def add_data(data_dict, model_name, data_list):
         data_dict['avg'].append(sum(data_list)/len(data_list))
         data_dict['max'].append(max(data_list))
         data_dict['min'].append(min(data_list))
+
+def add_columns_mean(df):
+
+    return df.append({
+        'model':'Total',
+        'repetitions': df['repetitions'].mean(),
+        'avg': df['avg'].mean(),
+        'max': df['max'].mean(),
+        'min': df['min'].mean()
+    }, ignore_index=True)

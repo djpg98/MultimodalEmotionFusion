@@ -4,7 +4,7 @@ from os.path import join, exists
 
 import pandas as pd
 
-from Utils.table_utils import iterate_model_results, add_data
+from Utils.table_utils import iterate_model_results, add_data, add_columns_mean
 
 METHOD_LIST = [
     'mlp_simple',
@@ -78,6 +78,16 @@ df_unweighted_loss_train = pd.DataFrame(data=unweighted_loss_train)
 df_unweighted_acc_train = pd.DataFrame(data=unweighted_acc_train)
 df_unweighted_loss_val = pd.DataFrame(data=unweighted_loss_val)
 df_unweighted_acc_val = pd.DataFrame(data=unweighted_acc_val)
+
+df_weighted_loss_train = add_columns_mean(df_weighted_loss_train)
+df_weighted_acc_train = add_columns_mean(df_weighted_acc_train)
+df_weighted_loss_val = add_columns_mean(df_weighted_loss_val)
+df_weighted_acc_val = add_columns_mean(df_weighted_acc_val)
+
+df_unweighted_loss_train = add_columns_mean(df_unweighted_loss_train)
+df_unweighted_acc_train = add_columns_mean(df_unweighted_acc_train)
+df_unweighted_loss_val = add_columns_mean(df_unweighted_loss_val)
+df_unweighted_acc_val = add_columns_mean(df_unweighted_acc_val)
 
 with pd.ExcelWriter(f'{method}_tables.xlsx') as writer:
 

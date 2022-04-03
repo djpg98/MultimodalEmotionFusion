@@ -12,6 +12,7 @@ class MLP(nn.Module):
     """ Initialization method
         Parameters:
             - device: Device in which torch calculations will be performed
+            - name: Name of the network
             - net_structure: Structure of the desired MLP, formatted according to
             the specification in (FILE NAME)
     """

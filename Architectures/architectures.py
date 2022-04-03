@@ -162,6 +162,33 @@ MLP_ARCHITECTURES = {
 
         {
             'activation': 'softmax'
+        }
+    ],
+
+    'l500-l300-l4' : [
+        {
+            'repeat': 1,
+            'in_features': 12,
+            'neurons': 500,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 500,
+            'neurons': 300,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 300,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+
+        {
+            'activation': 'softmax'
         }    
     ]
 
@@ -169,6 +196,26 @@ MLP_ARCHITECTURES = {
 }
 
 INTRA_FUSION_MLP = {
+    'l5-l4' : [
+        {
+            'repeat': 1,
+            'in_features': 8,
+            'neurons': 5,
+            'activation': 'relu'            
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 5,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        }          
+    ],
+
     'l7-l4' : [
         {
             'repeat': 1,
@@ -219,5 +266,10 @@ ATTENTION_MLP_ARCHITECTURES = {
     'l12a-l10f' : {
         'attention_fusion': INTRA_FUSION_MLP['l12-l4'],
         'multimodal_fusion': MLP_ARCHITECTURES['l10-l4']        
+    },
+
+    'l5a-l2l7f' : {
+        'attention_fusion': INTRA_FUSION_MLP['l5-l4'],
+        'multimodal_fusion': MLP_ARCHITECTURES['2l7-l4']          
     }
 }

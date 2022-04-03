@@ -30,9 +30,11 @@ for key in architecture_list.keys():
     if status == -1:
         sys.exit(-1)
 
+    if key == 'l3-l4':
+        continue
     status = os.system(f"python run_n_iterations.py {method} {key} {iterations_start} {iterations_end} -w")
 
     if status == -1:
         sys.exit(-1)
 
-os.system(f'python make_tables {method}')
+os.system(f'python make_table {method}')
