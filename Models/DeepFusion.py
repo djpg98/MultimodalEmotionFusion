@@ -14,6 +14,8 @@ class WeightedMode(nn.Module):
     """
     def __init__(self, device, input_size):
 
+        super(WeightedMode, self).__init__()
+
         self.device = device
         self.quality_factor = 1 / input_size
         self.linear = nn.Linear(in_features=input_size, out_features=1)
@@ -49,13 +51,15 @@ class WeightedCombination(nn.Module):
     """
     def __init__(self, device, name, modes, modality_size):
 
+        super(WeightedCombination, self).__init__()
+
         self.device = device
         self.name = name
         self.modes = modes
 
         for i in range(self.modes):
 
-            setattr(f'weighted_mode_{i}', WeightedMode(self.device, modality_size))
+            setattr(self, f'weighted_mode_{i}', WeightedMode(self.device, modality_size))
 
         self.softmax = nn.Softmax()
         self.gru = nn.GRU(input_size=4, hidden_size=4, num_layers=2, batch_first=True)
@@ -74,17 +78,18 @@ class WeightedCombination(nn.Module):
 
         for i in range(self.modes):
 
-            modality_weight = getattr(f'weighted_mode_{i}')(input_list[i])
+            modality_weight = getattr(self, f'weighted_mode_{i}')(input_list[i])
             all_weights.append(modality_weight)
 
-        normalized_weights = self.softmax(torch.tensor(all_weights))
+        normalized_weights = self.softmax(torch.stack(all_weights))
 
         for weight, input_vector in zip(normalized_weights, input_list):
             weighted_modality_output = torch.mul(weight, input_vector)
             modality_results.append(weighted_modality_output)
-
-        combination = torch.sum(torch.tensor(modality_results), dim=1) #Check if dim is right
-        result, hidden_state = self.gru(combination)
+            
+        combination = torch.sum(torch.stack(modality_results), dim=0) #dim is right
+        reshaped_combination =  torch.stack(list(map(lambda y: torch.reshape(y, (1, len(input_list[i][0]))), combination)))
+        result, hidden_state = self.gru(reshaped_combination)
 
         return result
 
@@ -103,6 +108,8 @@ class CrossOneModality(nn.Module):
             - activation_function: Activation function to be used by this module
     """
     def __init__(self, device, input_size, output_size, number_of_modes, activation_function):
+
+        super(CrossOneModality, self).__init__()
 
         self.device = device
         self.linear = nn.Linear(in_features=input_size*number_of_modes, out_features=output_size)
@@ -155,17 +162,19 @@ class CrossModality(nn.Module):
     """
     def __init__(self, device, name, modes, modality_size, activation_function):
 
+        super(CrossModality, self).__init__()
+
         self.device = device
         self.name = name
         self.modes = modes
 
         for i in range(self.modes):
 
-            setattr(f'cross_one_modality_{i}', CrossOneModality(
+            setattr(self, f'cross_one_modality_{i}', CrossOneModality(
                 device=self.device, 
                 input_size=modality_size, 
                 output_size=modality_size,
-                number_of_modes=self.modes,
+                number_of_modes=self.modes - 1,
                 activation_function=activation_function
             ))
 
@@ -180,14 +189,14 @@ class CrossModality(nn.Module):
 
         for i in range(self.modes):
 
-            output_vector = getattr(f'cross_one_modality_{i}')(i, input_list[i])
+            output_vector = getattr(self, f'cross_one_modality_{i}')(i, input_list)
             correlations.append(output_vector)
 
         avg_correlation = torch.mean(
             torch.stack(
                 tuple(correlations)
             ),
-            dim=1
+            dim=0
         )
 
         return avg_correlation
@@ -218,6 +227,8 @@ class DeepFusion(nn.Module):
             - cross_modality_activation: Activation function to be used by the CrossModality Modules
     """
     def __init__(self, device, name, modes, modality_size, cross_modality_activation):
+
+        super(DeepFusion, self).__init__()
 
         self.device = device
         self.name = name
@@ -253,11 +264,13 @@ class DeepFusion(nn.Module):
         weighted_combination_result = self.weighted_combination_module(input_list)
         cross_modality_output = self.cross_modality_module(input_list)
 
+        weighted_combination_result = torch.reshape(weighted_combination_result, cross_modality_output.shape)
+
         concatenated_output = torch.cat([weighted_combination_result, cross_modality_output], dim=1)
         combination_output = self.linear(concatenated_output)
 
         result = self.softmax(combination_output)
 
-        return result
+        return result, weighted_combination_result, combination_output
 
         

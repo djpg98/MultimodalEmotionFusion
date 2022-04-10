@@ -4,7 +4,8 @@ from os.path import join, exists
 
 METHOD_SCRIPTS = {
     'mlp_simple': 'test_mlp.py',
-    'attention_mlp': 'test_attention.py'
+    'attention_mlp': 'test_attention.py',
+    'deep_fusion': 'test_deepfusion.py'
 }
 
 """

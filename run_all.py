@@ -2,10 +2,12 @@ import os
 import sys
 
 import Architectures.architectures as architectures
+import Parameters.parameters as parameters
 
 METHOD_LIST = [
     'mlp_simple',
-    'attention_mlp'
+    'attention_mlp',
+    'deep_fusion'
 ]
 
 method = sys.argv[1]
@@ -23,6 +25,9 @@ if method == 'mlp_simple':
 if method == "attention_mlp":
     architecture_list = architectures.ATTENTION_MLP_ARCHITECTURES
 
+if method == "deep_fusion":
+    architecture_list = parameters.DEEP_FUSION_PARAMETERS
+
 for key in architecture_list.keys():
 
     status = os.system(f"python run_n_iterations.py {method} {key} {iterations_start} {iterations_end}")
@@ -37,4 +42,4 @@ for key in architecture_list.keys():
     if status == -1:
         sys.exit(-1)
 
-os.system(f'python make_table {method}')
+os.system(f'python make_table.py {method}')
