@@ -9,7 +9,9 @@ from Utils.table_utils import iterate_model_results, add_data, add_columns_mean
 METHOD_LIST = [
     'mlp_simple',
     'attention_mlp',
-    'deep_fusion'
+    'deep_fusion',
+    'weighted_combination',
+    'cross_modality'
 ]
 
 weighted_loss_train = {'model': [], 'repetitions': [], 'avg': [], 'min': [], 'max': []}

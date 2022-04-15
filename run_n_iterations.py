@@ -5,7 +5,9 @@ from os.path import join, exists
 METHOD_SCRIPTS = {
     'mlp_simple': 'test_mlp.py',
     'attention_mlp': 'test_attention.py',
-    'deep_fusion': 'test_deepfusion.py'
+    'deep_fusion': 'test_deepfusion.py',
+    'weighted_combination': 'test_weighted_combination.py',
+    'cross_modality': 'test_crossmodality.py'
 }
 
 """
@@ -13,6 +15,8 @@ INSTRUCTIONS:
     This script requires four arguments and has an optional one:
     - method: Fusion method to be used
     - architechture: Fusion architechture to be used (Available architectures are listed at Architectures/architectures.py)
+    Note: In the case of DeepFusion here goes the name of the parameter set for the loss function (Available parametere set
+    are listed at Parameteres/parameters.py)
     - start: First iteration number
     - end: Last iteration number
     - weighted (Optional): If passed a Weighted loss function is used (Pass "-w" as the last argument). 

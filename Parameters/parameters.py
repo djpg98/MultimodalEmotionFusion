@@ -12,5 +12,10 @@ DEEP_FUSION_PARAMETERS = {
     'w2-c1' : {
         "weighted_module": 2,
         "crossmodality": 1
+    },
+
+    'w1-c092' : {
+        "weighted_module": 1,
+        "crossmodality": 0.92
     }
 }
