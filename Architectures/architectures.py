@@ -273,3 +273,32 @@ ATTENTION_MLP_ARCHITECTURES = {
         'multimodal_fusion': MLP_ARCHITECTURES['2l7-l4']          
     }
 }
+
+TENSORFUSION_ARCHITECTURES = {
+    'test' : [
+        {
+            'repeat': 1,
+            'in_features': 125,
+            'neurons': 128,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 128,
+            'neurons': 128,
+            'activation': 'relu'
+        }, 
+
+        {
+            'repeat': 1,
+            'in_features': 128,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        } 
+    ]
+}

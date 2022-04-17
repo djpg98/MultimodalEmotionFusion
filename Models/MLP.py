@@ -29,9 +29,12 @@ class MLP(nn.Module):
             - input_list: List containing the results from each modality
         Returns: The output of the MLP
     """
-    def forward(self, input_list):
+    def forward(self, input_list, concat=True):
 
-        concatenated_input = torch.cat([input_list[i] for i in range(len(input_list))], dim=1)
+        if concat:
+            concatenated_input = torch.cat([input_list[i] for i in range(len(input_list))], dim=1)
+        else:
+            concatenated_input = torch.stack(input_list)
         return self.layers(concatenated_input)
 
 

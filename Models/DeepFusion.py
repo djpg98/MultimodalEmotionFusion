@@ -92,52 +92,6 @@ class WeightedCombination(nn.Module):
 
         return result
 
-""" This is a version of the WeightedCombination Module that adds a softmax layer at the end for
-    classification purposes
-"""
-class WeightedCombinationClassifier(nn.Module):
-
-    """ Class constructor
-        Parameters:
-            - device: Device in which torch calculations will be performed
-            - name: Name of the network
-            - modes: Number of modalities to be considered
-            - modality_size: The number of features in each modality. All modalities must 
-              have the same number of features
-    """
-    def __init__(self, device, name, modes, modality_size):
-
-        super(WeightedCombinationClassifier, self).__init__()
-
-        self.device = device
-        self.name = name
-
-        self.weighted_combination_module = WeightedCombination(
-            device=device, 
-            name=f'{name}_weighted_c_module', 
-            modes=modes,
-            modality_size=modality_size
-        )
-
-        self.softmax = nn.Softmax()
-
-    """ Forward propagation method
-        Parameters:
-            - input_list: List containing the results from each modality
-        Returns: A set of features with the same size as the input features
-        of each modality.
-    """
-    def forward(self, input_list):
-
-        weighted_combination_result = self.weighted_combination_module(input_list)
-
-        weighted_combination_result = torch.reshape(weighted_combination_result, (weighted_combination_result.shape[0], 4))
-
-        results = self.softmax(weighted_combination_result)
-
-        return results
-
-
 """ A 1-layer network that obtains a set of features that represents the cross-modality 
     correlation between a specific modality (Referred in this class' description as the 
     main modality) and other considered modalities
@@ -246,54 +200,6 @@ class CrossModality(nn.Module):
 
         return avg_correlation
 
-""" This is a version of the CrossModality Module that adds a softmax layer at the end for
-    classification purposes
-"""
-class CrossModalityClassifier(nn.Module):
-
-    """ Class constructor
-        Parameters:
-            - device: Device in which torch calculations will be performed
-            - name: Name of the network
-            - modes: Number of modalities to be considered
-            - modality_size: The number of features in each modality. All modalities must 
-              have the same number of features
-            - activation_function: Activation function to be used by the CrossOneModality Modules
-            
-        Warning: This implementation assumes that the output size of the CrossOneModality
-        instances is modality_size, but nothing in the paper suggests that this is mandatory. So
-        one could modify the constructor so the output size is not necessarily the same as the
-        modality_size. Although be aware that if you do this you must also must change the in_features
-        value in the initialization of the self.linear attribute in the constructor of the DeepFusion class
-    """
-    def __init__(self, device, name, modes, modality_size, activation_function):
-
-        super(CrossModalityClassifier, self).__init__()
-
-        self.device = device
-        self.name = name
-
-        self.cross_modality_module = CrossModality(
-            device=device, 
-            name=f'{name}_cross_m_module', 
-            modes=modes,
-            modality_size=modality_size,
-            activation_function=activation_function
-        )
-
-        self.softmax = nn.Softmax()
-
-    """ Forward propagation method
-        Parameters:
-            - input_list: List containing the results from each modality
-        Returns: An average of the correlation vectors obtained for each modality 
-    """
-    def forward(self, input_list):
-        cross_modality_output = self.cross_modality_module(input_list)
-        result = self.softmax(cross_modality_output)
-
-        return result
-
 """ An adaptation of the DeepFusion Method proposed by Xue, Jiang, Miao, Yuan, Ma, Ma, 
     Wang, Yao, Xu, Zhang, Su (2019) for the architecture used in this project. Since the feature 
     vectors obtained from each modality are already the same size and are pretty short, some 
@@ -365,5 +271,98 @@ class DeepFusion(nn.Module):
         result = self.softmax(combination_output)
 
         return result, weighted_combination_result, combination_output
+
+""" This is a version of the WeightedCombination Module that adds a softmax layer at the end for
+    classification purposes
+"""
+class WeightedCombinationClassifier(nn.Module):
+
+    """ Class constructor
+        Parameters:
+            - device: Device in which torch calculations will be performed
+            - name: Name of the network
+            - modes: Number of modalities to be considered
+            - modality_size: The number of features in each modality. All modalities must 
+              have the same number of features
+    """
+    def __init__(self, device, name, modes, modality_size):
+
+        super(WeightedCombinationClassifier, self).__init__()
+
+        self.device = device
+        self.name = name
+
+        self.weighted_combination_module = WeightedCombination(
+            device=device, 
+            name=f'{name}_weighted_c_module', 
+            modes=modes,
+            modality_size=modality_size
+        )
+
+        self.softmax = nn.Softmax()
+
+    """ Forward propagation method
+        Parameters:
+            - input_list: List containing the results from each modality
+        Returns: A set of features with the same size as the input features
+        of each modality.
+    """
+    def forward(self, input_list):
+
+        weighted_combination_result = self.weighted_combination_module(input_list)
+
+        weighted_combination_result = torch.reshape(weighted_combination_result, (weighted_combination_result.shape[0], 4))
+
+        results = self.softmax(weighted_combination_result)
+
+        return results
+
+""" This is a version of the CrossModality Module that adds a softmax layer at the end for
+    classification purposes
+"""
+class CrossModalityClassifier(nn.Module):
+
+    """ Class constructor
+        Parameters:
+            - device: Device in which torch calculations will be performed
+            - name: Name of the network
+            - modes: Number of modalities to be considered
+            - modality_size: The number of features in each modality. All modalities must 
+              have the same number of features
+            - activation_function: Activation function to be used by the CrossOneModality Modules
+            
+        Warning: This implementation assumes that the output size of the CrossOneModality
+        instances is modality_size, but nothing in the paper suggests that this is mandatory. So
+        one could modify the constructor so the output size is not necessarily the same as the
+        modality_size. Although be aware that if you do this you must also must change the in_features
+        value in the initialization of the self.linear attribute in the constructor of the DeepFusion class
+    """
+    def __init__(self, device, name, modes, modality_size, activation_function):
+
+        super(CrossModalityClassifier, self).__init__()
+
+        self.device = device
+        self.name = name
+
+        self.cross_modality_module = CrossModality(
+            device=device, 
+            name=f'{name}_cross_m_module', 
+            modes=modes,
+            modality_size=modality_size,
+            activation_function=activation_function
+        )
+
+        self.softmax = nn.Softmax()
+
+    """ Forward propagation method
+        Parameters:
+            - input_list: List containing the results from each modality
+        Returns: An average of the correlation vectors obtained for each modality 
+    """
+    def forward(self, input_list):
+        cross_modality_output = self.cross_modality_module(input_list)
+        result = self.softmax(cross_modality_output)
+
+        return result
 
         

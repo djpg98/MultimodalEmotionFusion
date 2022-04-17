@@ -7,7 +7,8 @@ METHOD_SCRIPTS = {
     'attention_mlp': 'test_attention.py',
     'deep_fusion': 'test_deepfusion.py',
     'weighted_combination': 'test_weighted_combination.py',
-    'cross_modality': 'test_crossmodality.py'
+    'cross_modality': 'test_crossmodality.py',
+    'tensorfusion': 'test_tensorfusion.py'
 }
 
 """
