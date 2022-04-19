@@ -11,7 +11,9 @@ METHOD_LIST = [
     'attention_mlp',
     'deep_fusion',
     'weighted_combination',
-    'cross_modality'
+    'cross_modality',
+    'tensorfusion',
+    'embracenet'
 ]
 
 weighted_loss_train = {'model': [], 'repetitions': [], 'avg': [], 'min': [], 'max': []}
@@ -92,7 +94,7 @@ df_unweighted_acc_train = add_columns_mean(df_unweighted_acc_train)
 df_unweighted_loss_val = add_columns_mean(df_unweighted_loss_val)
 df_unweighted_acc_val = add_columns_mean(df_unweighted_acc_val)
 
-with pd.ExcelWriter(f'{method}_tables.xlsx') as writer:
+with pd.ExcelWriter(join('Tables', f'{method}_tables.xlsx')) as writer:
 
     df_weighted_loss_train.to_excel(writer, sheet_name='Weighted Loss Train')
     df_weighted_acc_train.to_excel(writer, sheet_name='Weighted Acc Train')

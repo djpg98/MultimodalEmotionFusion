@@ -8,7 +8,8 @@ METHOD_SCRIPTS = {
     'deep_fusion': 'test_deepfusion.py',
     'weighted_combination': 'test_weighted_combination.py',
     'cross_modality': 'test_crossmodality.py',
-    'tensorfusion': 'test_tensorfusion.py'
+    'tensorfusion': 'test_tensorfusion.py',
+    'embracenet': 'test_embracenet.py'
 }
 
 """
