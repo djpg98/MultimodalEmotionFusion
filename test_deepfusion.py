@@ -15,6 +15,13 @@ from Utils.dataloaders import my_collate
 from Utils.datasets import FusionTransformer
 from Utils.training_functions import train_deep_fusion
 
+"""Script command line arguments (In order):
+    - model_name: Name of the model. Must be a name in the parameters file
+      This name is going to be used in the results files (Plots, csvs and pth)
+    - learning_rate: Learning rate used for training. If 0 it uses the optimizers' default
+    - Weight: If passed (As a '-w' flag), use weight for samples during training. 
+"""
+
 classes = {'exc':0, 'neu':1, 'sad':2, 'hap':0, 'ang':3, 'number': 4}
 
 face_data = join('Data', 'facepreds_allsess_v4_55A.p')

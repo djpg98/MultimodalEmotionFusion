@@ -4,8 +4,19 @@ import torch.nn as nn
 from Models.MLP import MLP
 from Utils.fusion_utils import generate_outer_product_equation
 
+""" A fusion method based on the tensorfusion method proposed by Zadeh, Chen, Poria, Cambria, Morency (2017) 
+    it uses the outer product of all modalitites as input for a classifier, in this case an MLP
+"""
 class TensorFusion(nn.Module):
 
+    """ Class constructor
+        Parameters:
+            - device: Device in which torch calculations will be performed
+            - name: Network name
+            - net_structure: Structure of the MLP that will be used to classify the features obtained
+              by the outer product of the modalities
+            - number_of_modes: Number of modalities to be considered
+    """
     def __init__(self, device, name, number_of_modes, net_structure):
 
         super(TensorFusion, self).__init__()
@@ -19,6 +30,12 @@ class TensorFusion(nn.Module):
             net_structure=net_structure
         )
 
+    """ Forward propagation method. This forward method is specifically designed to work 
+        with the results of multiple modalities as input
+        Parameters:
+            - input_list: List containing the results from each modality
+        Returns: The output of the MLP
+    """
     def forward(self, input_list):
 
         batch_size = len(input_list[0])

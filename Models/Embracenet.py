@@ -2,6 +2,7 @@
 import torch
 import torch.nn as nn
 
+"Based on the embracenet proposed by Jun-Ho Choi, Jong-Seok Lee (2019)"
 class EmbraceNet(nn.Module):
 	def __init__(self, device, input_size_list, embracement_size=256, bypass_docking=False):
 		super(EmbraceNet, self).__init__()
