@@ -129,7 +129,7 @@ def train_mlp(model, learning_rate, train_dataloader, epochs, loss_function, opt
 
         if save:
             if learning_rate != 0:
-                save_results(f'{model.name}_lr_{learning_rate}', fusion_type, train_loss, train_acc, val_loss, val_acc)
+                save_results(f'{model.name}_lr_{str(learning_rate).replace(".", "")}', fusion_type, train_loss, train_acc, val_loss, val_acc)
             else:
                 save_results(f'{model.name}_adam', fusion_type, train_loss, train_acc, val_loss, val_acc)
 
@@ -222,7 +222,7 @@ def train_deep_fusion(model, learning_rate, train_dataloader, epochs, loss_funct
 
         if save:
             if learning_rate != 0:
-                save_results(f'{model.name}_lr_{learning_rate}', fusion_type, train_loss, train_acc, val_loss, val_acc)
+                save_results(f'{model.name}_lr_{str(learning_rate).replace(".", "")}', fusion_type, train_loss, train_acc, val_loss, val_acc)
             else:
                 save_results(f'{model.name}_adam', fusion_type, train_loss, train_acc, val_loss, val_acc)
 
@@ -301,6 +301,6 @@ def train_embracenet(model, learning_rate, train_dataloader, epochs, loss_functi
 
         if save:
             if learning_rate != 0:
-                save_results(f'{model.name}_lr_{learning_rate}', fusion_type, train_loss, train_acc, val_loss, val_acc)
+                save_results(f'{model.name}_lr_{str(learning_rate).replace(".", "")}', fusion_type, train_loss, train_acc, val_loss, val_acc)
             else:
                 save_results(f'{model.name}_adam', fusion_type, train_loss, train_acc, val_loss, val_acc)
