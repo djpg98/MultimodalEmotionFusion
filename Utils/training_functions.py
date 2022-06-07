@@ -1,47 +1,10 @@
-import csv
-from os.path import join
-
 import torch
 from tqdm.notebook import tqdm
 
-
-""" Saves the results (loss and acc) for each epoch (Training and validation) in csv files. 
-    The files are saved in the Results folder under the name results_{model_name}_{metric}.csv
-    Parameters:
-        - model_name: Name of the model that produced the results
-        - train_loss: List containing the loss for each epoch of training
-        - train_acc: List containing the acc for each epoch of training
-        - val_loss: List containing the loss for each validation performed during training. May be empty
-        - val_acc: List containing the acc for each validation performed during training. May be empty
-"""
-def save_results(model_name, prefix, train_loss, train_acc, val_loss, val_acc):
-
-    epochs = len(train_loss)
-
-    if len(val_loss) != 0:
-
-        header = ['epoch', 'train', 'val']
-        results_loss = zip([i for i in range(1, epochs + 1)], train_loss, val_loss)
-        results_acc = zip([i for i in range(1, epochs + 1)], train_acc, val_acc)
-
-    else:
-
-        header = ['epoch', 'train']
-        results_loss = zip([i for i in range(1, epochs + 1)], train_loss)
-        results_acc = zip([i for i in range(1, epochs + 1)], train_acc)
-
-
-    with open(join('Results', prefix, 'Training Data', f'model_{model_name}_loss.csv'), 'w') as loss_file:
-
-        writer = csv.writer(loss_file, delimiter=",")
-        writer.writerow(header)
-        writer.writerows(results_loss)
-
-    with open(join('Results', prefix, 'Training Data', f'model_{model_name}_acc.csv'), 'w') as acc_file:
-
-        writer = csv.writer(acc_file, delimiter=",")
-        writer.writerow(header)
-        writer.writerows(results_acc)
+from Models.DeepFusion import DeepFusion
+from Models.MLP import MLP
+from Models.Embracenet import Wrapper 
+from Utils.results_saving import save_results
 
 """ Trains a MLP.
     Parameters:
@@ -243,21 +206,19 @@ def train_embracenet(model, learning_rate, train_dataloader, epochs, loss_functi
 
         for batch in tqdm(train_dataloader):
 
-            face_data = batch['face']
-            audio_data = batch['audio']
-            text_data = batch['text']
             expected_value = torch.argmax(batch['label'], dim=-1)#.flatten()
-            avails = batch['availabilities']
+            batch.pop('label')
+            batch.pop('name')
             
             optimizer.zero_grad()
-            output_value = model(face_data, audio_data, text_data, avails)
+            output_value = model(**batch)
             loss = loss_function(output_value, expected_value)
             loss.backward()
             optimizer.step()
 
             train_sum_loss += loss.item()
             train_correct += (torch.argmax(output_value, dim=1) == expected_value).float().sum().item()
-            train_total += face_data.shape[0]
+            train_total += batch['face'].shape[0]
 
         epoch_loss = train_sum_loss / train_total
         epoch_acc = train_correct / train_total
@@ -275,18 +236,16 @@ def train_embracenet(model, learning_rate, train_dataloader, epochs, loss_functi
 
                 for batch in tqdm(validation_dataloader):
 
-                    face_data = batch['face']
-                    audio_data = batch['audio']
-                    text_data = batch['text']
                     expected_value = torch.argmax(batch['label'], dim=-1)#.flatten()
-                    avails = batch['availabilities']
+                    batch.pop('label')
+                    batch.pop('name')
 
-                    output_value = model(face_data, audio_data, text_data, avails)
+                    output_value = model(**batch)
                     loss = loss_function(output_value, expected_value)
 
                     val_sum_loss += loss.item()
                     val_correct += (torch.argmax(output_value, dim=1) == expected_value).float().sum().item()
-                    val_total += face_data.shape[0]
+                    val_total += batch['face'].shape[0]
 
             epoch_loss = val_sum_loss / val_total
             epoch_acc = val_correct / val_total
