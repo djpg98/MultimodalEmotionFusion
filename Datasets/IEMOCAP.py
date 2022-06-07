@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 
 #Esta clase es la que se utiliza para trabajar el dataset de IEMOCAP. La saqué del código de JuanPablo
 class DatasetIEMOCAP(Dataset):
-    def __init__(self, classes, FaceR, AudioR, TextR, method='avg', mode='train', transform=None):
+    def __init__(self, classes, FaceR, AudioR, TextR, method='avg', mode='train', transform=None, omit_modality=None):
         super(DatasetIEMOCAP, self).__init__()
         self.Data = {}
         self.DataKeys = []
@@ -17,6 +17,7 @@ class DatasetIEMOCAP(Dataset):
         self.Classes = classes
         self.Mode = mode
         self.Method = method
+        self.omit_modality = omit_modality
         self.loadData(FaceR, AudioR, TextR)
 
     def loadData(self, face_results, audio_results, text_results):
@@ -70,17 +71,17 @@ class DatasetIEMOCAP(Dataset):
         avs = np.ones(3)
         label = self.Data[self.DataKeys[idx]][0]
         face = self.Data[self.DataKeys[idx]][1]
-        if face is None:
+        if face is None or self.omit_modality == 'face':
             avs[0] = 0.
             face = np.zeros(self.Classes['number'])
         
         audio = self.Data[self.DataKeys[idx]][2]
-        if audio is None:
+        if audio is None or self.omit_modality == 'audio':
             avs[1] = 0.
             audio = np.zeros(self.Classes['number'])
         
         text = self.Data[self.DataKeys[idx]][3]
-        if text is None:
+        if text is None or self.omit_modality == 'text':
             avs[2] = 0.
             text = np.zeros(self.Classes['number'])
 

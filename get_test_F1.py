@@ -1,8 +1,11 @@
 import os
 import pickle
 import sys
+import re
 from os.path import join, exists
 
+import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from Datasets.IEMOCAP import DatasetIEMOCAP
@@ -31,18 +34,34 @@ INSTRUCTIONS:
         in iterate_models_get_metric. Otherwise this will not work
         - save_report: (Pass a -s flag if you wish to activate this option) When calculating f1-score, additionally
         save a file with the sklearn classification_report
+        - Omit modality flags: -nface (No face modality), -naudio (No audio modality), -ntext (No text modality) (Currently, 
+        only one modality can be omitted)
 """
 
 classes = {'exc':0, 'neu':1, 'sad':2, 'hap':0, 'ang':3, 'number': 4}
 
+metric_kwargs = {}
+
 method = sys.argv[1]
 metric = sys.argv[2]
 
-metric_kwargs = {}
+if metric == "basics":
+
+    metric_kwargs['unweighted_loss'] = nn.CrossEntropyLoss()
+    metric_kwargs['weighted_loss'] = nn.CrossEntropyLoss(weight=torch.tensor([0.8982412060301508,0.8100453172205438,1.2783075089392133,1.1495176848874598]))
 
 if len(sys.argv) > 3:
     if "-s" in sys.argv[3:]:
         metric_kwargs['save_report'] = True
+
+    #Check omit modality flags
+    flag_pattern = re.compile(r"-n\w+")
+    flag = flag_pattern.search(" ".join(list(map(lambda x: x.split()[0], sys.argv[3:]))))
+
+    if flag is not None and flag.group() in ["-nface", "-naudio", "-ntext"]:
+        omit_modality = flag.group()[2:]
+    else: 
+        omit_modality = None
         
 saved_models_path = join('Saved Models', method)
 
@@ -66,10 +85,10 @@ BatchSize = 32
 
 train_dataset = DatasetIEMOCAP(classes, face_data, audi_data,
                                text_data, 'average',
-                               transform=FusionTransformer(''))
+                               transform=FusionTransformer(''), omit_modality=omit_modality)
 test_dataset = DatasetIEMOCAP(classes, face_data, audi_data,
                               text_data, 'average', mode = 'test',
-                              transform=FusionTransformer(''))
+                              transform=FusionTransformer(''), omit_modality=omit_modality)
 
 train_dataloader = DataLoader(train_dataset,
                               batch_size=BatchSize, collate_fn=my_collate)
@@ -90,7 +109,16 @@ for model_dir in os.listdir(encoded_path):
 
         encoded_iter_dir = os.fsencode(weighted_path)
 
-        iterate_models_get_metric(metric, encoded_iter_dir, weighted_path, method, train_dataloader, test_dataloader, metric_kwargs)
+        iterate_models_get_metric(
+            metric=metric, 
+            encoded_iter_dir=encoded_iter_dir, 
+            path_to_dir=weighted_path, 
+            method=method, 
+            configuration=decoded_model, 
+            train_dataloader=train_dataloader, 
+            test_dataloader=test_dataloader, 
+            kwargs=metric_kwargs
+        )
 
     unweighted_path = join(model_path, 'unweighted')
 
@@ -98,4 +126,13 @@ for model_dir in os.listdir(encoded_path):
 
         encoded_iter_dir = os.fsencode(unweighted_path)
 
-        iterate_models_get_metric(metric, encoded_iter_dir, unweighted_path, method, train_dataloader, test_dataloader, metric_kwargs)
+        iterate_models_get_metric(
+            metric=metric, 
+            encoded_iter_dir=encoded_iter_dir, 
+            path_to_dir=unweighted_path, 
+            method=method, 
+            configuration=decoded_model, 
+            train_dataloader=train_dataloader, 
+            test_dataloader=test_dataloader, 
+            kwargs=metric_kwargs
+        )

@@ -74,8 +74,8 @@ class Wrapper(nn.Module):
 			self.clf = nn.Sequential(nn.Linear(embracesize, n_classes),
 									nn.Softmax(dim=-1))
 
-	def forward(self, face, audio, text, avs):
-		out = self.Embrace([face, audio, text], availabilities=avs)
+	def forward(self, face, audio, text, availabilities):
+		out = self.Embrace([face, audio, text], availabilities=availabilities)
 		if self.classifier:
 			out = self.clf(out)
 		return out
