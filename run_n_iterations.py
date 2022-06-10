@@ -2,15 +2,15 @@ import os
 import sys
 from os.path import join, exists
 
-METHOD_SCRIPTS = {
-    'mlp_simple': 'test_mlp.py',
-    'attention_mlp': 'test_attention.py',
-    'deep_fusion': 'test_deepfusion.py',
-    'weighted_combination': 'test_weighted_combination.py',
-    'cross_modality': 'test_crossmodality.py',
-    'tensorfusion': 'test_tensorfusion.py',
-    'embracenet': 'test_embracenet.py'
-}
+METHOD_SCRIPTS = [
+    'mlp_simple',
+    'attention_mlp',
+    'deep_fusion',
+    'weighted_combination',
+    'cross_modality',
+    'tensorfusion',
+    'embracenet',
+]
 
 """
 INSTRUCTIONS:
@@ -33,8 +33,6 @@ if method not in METHOD_SCRIPTS.keys():
     formated_method_list = ", ".join(METHOD_SCRIPTS.keys())
     print(f"Error: Selected fusion method does not exist. Try with one of the following: {formated_method_list}")
     sys.exit(-1)
-
-script = METHOD_SCRIPTS[method]
 
 if (len(sys.argv) == 6 and sys.argv[5] == '-w'):
     directory = 'weighted'
@@ -65,9 +63,9 @@ if not exists(saved_models_path):
 for i in range(iterations_start, iterations_end):
 
     if weight:
-        status = os.system(f"python {script} {architechture} 0 -w")
+        status = os.system(f"python test_model.py {method} {architechture} 0 -w")
     else:
-        status = os.system(f"python {script} {architechture} 0")
+        status = os.system(f"python test_model.py {method} {architechture} 0")
 
     if status == -1:
         sys.exit(-1)
