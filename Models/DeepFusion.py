@@ -61,7 +61,7 @@ class WeightedCombination(nn.Module):
 
             setattr(self, f'weighted_mode_{i}', WeightedMode(self.device, modality_size))
 
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=0)
         self.gru = nn.GRU(input_size=4, hidden_size=4, num_layers=2, batch_first=True)
 
     """ Forward propagation method
@@ -249,7 +249,7 @@ class DeepFusion(nn.Module):
 
         self.linear = nn.Linear(in_features=2*modality_size, out_features=modality_size)
 
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=1)
 
     """ Forward propagation method. This forward method is specifically designed to work 
         with the results of multiple modalities as input
@@ -299,7 +299,7 @@ class WeightedCombinationClassifier(nn.Module):
             modality_size=modality_size
         )
 
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=1)
 
     """ Forward propagation method
         Parameters:
@@ -352,7 +352,7 @@ class CrossModalityClassifier(nn.Module):
             activation_function=activation_function
         )
 
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=1)
 
     """ Forward propagation method
         Parameters:

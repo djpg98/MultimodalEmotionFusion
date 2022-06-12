@@ -1,14 +1,9 @@
-import csv
 import os
-import re
 import sys
-from os.path import join, split
+from os.path import join, exists
 
-import numpy as np
 import torch
 import torch.nn as nn
-from sklearn.metrics import classification_report
-from tqdm.notebook import tqdm
 
 from Architectures.architectures import MLP_ARCHITECTURES, ATTENTION_MLP_ARCHITECTURES, TENSORFUSION_ARCHITECTURES
 from Models.Attention import AttentionMLP
@@ -16,14 +11,14 @@ from Models.DeepFusion import DeepFusion, WeightedCombinationClassifier, CrossMo
 from Models.Embracenet import Wrapper
 from Models.MLP import MLP
 from Models.TensorFusion import TensorFusion
-from Utils.results_saving import save_f1, save_results
+from Parameters.parameters import DEEP_FUSION_PARAMETERS
+from Utils.results_saving import save_f1, save_results_basic
+from Utils.training_functions import exec_model
     
-def eval_f1(model, results_path, train_dataloader=None, test_dataloader=None, save_report=False):
+def eval_f1(model, results_path, train_dataloader=None, test_dataloader=None, run_batch_cleaner=False, save_report=False):
 
     if train_dataloader is None and test_dataloader is None:
         raise Exception("At least one dataloader (Train or test) must be passed")
-
-    model.eval()
 
     with torch.no_grad():
 
@@ -32,44 +27,27 @@ def eval_f1(model, results_path, train_dataloader=None, test_dataloader=None, sa
 
         if train_dataloader is not None:
 
-            for batch in tqdm(train_dataloader):
-
-                input_list = [batch['face'], batch['audio'], batch['text']]
-                expected_value = torch.argmax(batch['label'], dim=-1)
-                
-                if isinstance(model, DeepFusion):
-                    output_value = model(input_list)[0]
-                elif isinstance(model, Wrapper):
-                    batch.pop('label')
-                    batch.pop('name')
-                    output_value = model(**batch)
-                else:
-                    output_value = model(input_list)
-
-                train_expected_output_list += expected_value.tolist()
-                train_actual_output_list += torch.argmax(output_value, dim=1).tolist()
+            exec_model(
+                model=model,
+                dataloader=train_dataloader,
+                expected_output_list=train_expected_output_list,
+                actual_output_list=train_actual_output_list,
+                run_batch_cleaner=run_batch_cleaner
+            )
 
         test_expected_output_list = []
         test_actual_output_list = []
 
         if test_dataloader is not None:
 
-            for batch in tqdm(test_dataloader):
+            exec_model(
+                model=model,
+                dataloader=test_dataloader,
+                expected_output_list=test_expected_output_list,
+                actual_output_list=test_actual_output_list,
+                run_batch_cleaner=run_batch_cleaner
+            )
 
-                input_list = [batch['face'], batch['audio'], batch['text']]
-                expected_value = torch.argmax(batch['label'], dim=-1)
-
-                if isinstance(model, DeepFusion):
-                    output_value = model(input_list)[0]
-                elif isinstance(model, Wrapper):
-                    batch.pop('label')
-                    batch.pop('name')
-                    output_value = model(**batch)
-                else:
-                    output_value = model(input_list)
-
-                test_expected_output_list += expected_value.tolist()
-                test_actual_output_list += torch.argmax(output_value, dim=1).tolist()
 
         save_f1(
             model_name=model.name,
@@ -81,7 +59,7 @@ def eval_f1(model, results_path, train_dataloader=None, test_dataloader=None, sa
             save_report=save_report
         )
 
-def eval_basics(model, results_path, train_dataloader=None, test_dataloader=None, weighted_loss_function=None, unweighted_loss_function=None):
+def eval_basics(model, results_path, train_dataloader=None, test_dataloader=None, run_batch_cleaner=False, weighted_loss_function=None, unweighted_loss_function=None, loss_parameters=None, save_report=False):
 
     if train_dataloader is None and test_dataloader is None:
         raise Exception("At least one dataloader (Train or test) must be passed")
@@ -90,8 +68,6 @@ def eval_basics(model, results_path, train_dataloader=None, test_dataloader=None
         loss_function = unweighted_loss_function
     else:
         loss_function = weighted_loss_function
-
-    model.eval()
 
     with torch.no_grad():
 
@@ -102,37 +78,17 @@ def eval_basics(model, results_path, train_dataloader=None, test_dataloader=None
 
         if train_dataloader is not None:
 
-            train_sum_loss = 0
-            train_correct = 0
-            train_total = 0
-
-            for batch in tqdm(train_dataloader):
-
-                input_list = [batch['face'], batch['audio'], batch['text']]
-                expected_value = torch.argmax(batch['label'], dim=-1)
-                
-                if isinstance(model, DeepFusion):
-                    output_value = model(input_list)[0]
-                elif isinstance(model, Wrapper):
-                    batch.pop('label')
-                    batch.pop('name')
-                    output_value = model(**batch)
-                    loss = loss_function(output_value, expected_value)
-                else:
-                    output_value = model(input_list)
-                    loss = loss_function(output_value, expected_value)
-
-                train_sum_loss += loss.item()
-                train_correct += (torch.argmax(output_value, dim=1) == expected_value).float().sum().item()
-                train_total += batch['face'].shape[0]
-
-                train_expected_output_list += expected_value.tolist()
-                train_actual_output_list += torch.argmax(output_value, dim=1).tolist()
-
-            epoch_loss = train_sum_loss / train_total
-            epoch_acc = train_correct / train_total
-            train_loss.append(epoch_loss)
-            train_acc.append(epoch_acc)
+            exec_model(
+                model=model,
+                dataloader=train_dataloader,
+                loss_function=loss_function,
+                loss_list=train_loss,
+                acc_list=train_acc,
+                expected_output_list=train_expected_output_list,
+                actual_output_list=train_actual_output_list,
+                loss_parameters=loss_parameters,
+                run_batch_cleaner=run_batch_cleaner
+            )
 
         test_loss = []
         test_acc = []
@@ -141,43 +97,43 @@ def eval_basics(model, results_path, train_dataloader=None, test_dataloader=None
 
         if test_dataloader is not None:
 
-            test_sum_loss = 0
-            test_correct = 0
-            test_total = 0
+            exec_model(
+                model=model,
+                dataloader=test_dataloader,
+                loss_function=loss_function,
+                loss_list=test_loss,
+                acc_list=test_acc,
+                expected_output_list=test_expected_output_list,
+                actual_output_list=test_actual_output_list,
+                loss_parameters=loss_parameters,
+                run_batch_cleaner=run_batch_cleaner
+            )
 
-            for batch in tqdm(test_dataloader):
+        save_results_basic(
+            model_name=model.name,
+            results_path=results_path,
+            train_loss=train_loss[0],
+            train_acc=train_acc[0],
+            test_loss=test_loss[0],
+            test_acc=test_acc[0]
+        )
 
-                input_list = [batch['face'], batch['audio'], batch['text']]
-                expected_value = torch.argmax(batch['label'], dim=-1)
-
-                if isinstance(model, DeepFusion):
-                    output_value = model(input_list)[0]
-                elif isinstance(model, Wrapper):
-                    batch.pop('label')
-                    batch.pop('name')
-                    output_value = model(**batch)
-                    loss = loss_function(output_value, expected_value)
-                else:
-                    output_value = model(input_list)
-                    loss = loss_function(output_value, expected_value)
-
-                test_sum_loss += loss.item()
-                test_correct += (torch.argmax(output_value, dim=1) == expected_value).float().sum().item()
-                test_total += batch['face'].shape[0]
-                
-                test_expected_output_list += expected_value.tolist()
-                test_actual_output_list += torch.argmax(output_value, dim=1).tolist()
-
-            epoch_loss = test_sum_loss / test_total
-            epoch_acc = test_correct / test_total
-            test_loss.append(epoch_loss)
-            test_acc.append(epoch_acc)
+        save_f1(
+            model_name=model.name,
+            results_path=results_path,
+            train_expected=train_expected_output_list,
+            train_output=train_actual_output_list,
+            test_expected=test_expected_output_list,
+            test_output=test_actual_output_list,
+            save_report=save_report            
+        )
 
 
-def iterate_models_get_metric(metric, encoded_iter_dir, path_to_dir, method, configuration, train_dataloader=None, test_dataloader=None, **kwargs):
+def iterate_models_get_metric(metric, encoded_iter_dir, path_to_dir, method, configuration, train_dataloader=None, test_dataloader=None, omit_modality=None, **kwargs):
 
     available_metrics = {
-        'F1': eval_f1
+        'F1': eval_f1,
+        'basics': eval_basics
     }
 
     try:
@@ -202,11 +158,6 @@ def iterate_models_get_metric(metric, encoded_iter_dir, path_to_dir, method, con
         file_path = join(path_to_dir, file_name)
 
         model_name = file_name.replace(".pth", "")
-
-        #print("HERE")
-        #print(file_path)
-        #print(file_name)
-        #print(model_name)
 
         if method == "mlp_simple":
 
@@ -248,6 +199,8 @@ def iterate_models_get_metric(metric, encoded_iter_dir, path_to_dir, method, con
                 modality_size=4,
                 cross_modality_activation=nn.ReLU()
             )
+
+            kwargs['kwargs']['loss_parameters'] = DEEP_FUSION_PARAMETERS[configuration]
 
         if method == 'weighted_combination':
 
@@ -293,6 +246,21 @@ def iterate_models_get_metric(metric, encoded_iter_dir, path_to_dir, method, con
 
         loss_type = "unweighted" if "unweighted" in path_to_dir else "weighted"
 
-        results_path = join('Results', method, 'Training Data', configuration, loss_type)
+        if omit_modality is not None:
 
-        metric_function(model, results_path, train_dataloader, test_dataloader, **kwargs["kwargs"])
+            base_results_dir = f'Results (No {omit_modality})'
+            run_batch_cleaner = True
+
+        else:
+
+            base_results_dir = 'Results'
+            run_batch_cleaner = False
+
+        print(base_results_dir)
+
+        results_path = join(base_results_dir, method, 'Training Data', configuration, loss_type)
+
+        if not exists(results_path):
+            os.makedirs(results_path)
+
+        metric_function(model, results_path, train_dataloader, test_dataloader, run_batch_cleaner, **kwargs["kwargs"])

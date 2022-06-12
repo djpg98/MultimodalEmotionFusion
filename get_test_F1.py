@@ -47,11 +47,11 @@ metric = sys.argv[2]
 
 if metric == "basics":
 
-    metric_kwargs['unweighted_loss'] = nn.CrossEntropyLoss()
-    metric_kwargs['weighted_loss'] = nn.CrossEntropyLoss(weight=torch.tensor([0.8982412060301508,0.8100453172205438,1.2783075089392133,1.1495176848874598]))
+    metric_kwargs['unweighted_loss_function'] = nn.CrossEntropyLoss()
+    metric_kwargs['weighted_loss_function'] = nn.CrossEntropyLoss(weight=torch.tensor([0.8982412060301508,0.8100453172205438,1.2783075089392133,1.1495176848874598]))
 
 if len(sys.argv) > 3:
-    if "-s" in sys.argv[3:]:
+    if "-s" in sys.argv[3:] and metric in ['F1', 'basics']:
         metric_kwargs['save_report'] = True
 
     #Check omit modality flags
@@ -117,6 +117,7 @@ for model_dir in os.listdir(encoded_path):
             configuration=decoded_model, 
             train_dataloader=train_dataloader, 
             test_dataloader=test_dataloader, 
+            omit_modality=omit_modality,
             kwargs=metric_kwargs
         )
 
@@ -134,5 +135,6 @@ for model_dir in os.listdir(encoded_path):
             configuration=decoded_model, 
             train_dataloader=train_dataloader, 
             test_dataloader=test_dataloader, 
+            omit_modality=omit_modality,
             kwargs=metric_kwargs
         )

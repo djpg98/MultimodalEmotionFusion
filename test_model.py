@@ -21,7 +21,7 @@ from Utils.dataloaders import my_collate
 from Utils.datasets import FusionTransformer
 from Utils.training_functions import train_deep_fusion, train_embracenet, train_mlp
 
-"""Script command line arguments (In order):
+""" Script command line arguments (In order):
     - method: Name of the selected fusion method
     - model_name: Name of the model. Must be the name of an architecture in the architecture file
       This name is also going to be used in the results files (Plots, csvs and pth)

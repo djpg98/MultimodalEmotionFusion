@@ -4,6 +4,8 @@ from os.path import join
 
 from sklearn.metrics import classification_report
 
+IDENTIFIER_SEPARATOR = re.compile(r"adam_w|adam|lr_\d+_w|lr_\d+")
+
 """ Saves the results (loss and acc) for each epoch (Training and validation) in csv files. 
     The files are saved in the Results folder under the name results_{model_name}_{metric}.csv
     Parameters:
@@ -42,7 +44,50 @@ def save_results(model_name, prefix, train_loss, train_acc, val_loss, val_acc):
         writer.writerow(header)
         writer.writerows(results_acc)
 
-identifier_separator = re.compile(r"adam_w|adam|lr_\d+_w|lr_\d+")
+def save_results_basic(model_name, results_path, train_loss=None, train_acc=None, test_loss=None, test_acc=None):
+
+    header = []
+    results_loss = []
+    results_acc = []
+
+    if train_loss is not None:
+
+        header += ['train']
+        results_loss.append(train_loss)
+        results_acc.append(train_acc)
+
+    if test_loss is not None:
+
+        header += ['val']
+        results_loss.append(test_loss)
+        results_acc.append(test_acc)
+
+    name_sections = model_name.rpartition(IDENTIFIER_SEPARATOR.search(model_name).group())
+
+    if '_w' in name_sections[1]:
+        identifier_sections = name_sections[1].rpartition('_w')
+        prefix = name_sections[0] + identifier_sections[0]
+        suffix = identifier_sections[1] + name_sections[2]
+    else:
+        prefix  = name_sections[0] + name_sections[1]
+        suffix = name_sections[2]
+
+    loss_file_name = prefix + '_loss' + suffix + '.csv'
+
+    with open(join(results_path, loss_file_name), 'w') as loss_file:
+
+        writer = csv.writer(loss_file, delimiter=',')
+        writer.writerow(header)
+        writer.writerow(results_loss)
+
+    acc_file_name = prefix + '_acc' + suffix + '.csv'
+
+    with open(join(results_path, acc_file_name), 'w') as acc_file:
+
+        writer = csv.writer(acc_file, delimiter=',')
+        writer.writerow(header)
+        writer.writerow(results_acc)
+
 
 def save_f1(model_name, results_path, train_expected, train_output, test_expected, test_output, save_report=False):
 
@@ -63,7 +108,7 @@ def save_f1(model_name, results_path, train_expected, train_output, test_expecte
         results_macro.append(test_summary['macro avg']['f1-score'])
         results_weighted.append(test_summary['weighted avg']['f1-score'])
 
-    name_sections = model_name.rpartition(identifier_separator.search(model_name).group())
+    name_sections = model_name.rpartition(IDENTIFIER_SEPARATOR.search(model_name).group())
 
     if '_w' in name_sections[1]:
         identifier_sections = name_sections[1].rpartition('_w')
