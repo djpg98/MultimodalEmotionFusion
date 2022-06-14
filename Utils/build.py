@@ -23,9 +23,15 @@ def make_layer(layer_description):
     elif layer_description['activation'] == 'softmax':
 
         return [
-            nn.Softmax()
+            nn.Softmax(dim=1)
         ]
 
+    elif layer_description['activation'] == 'dropout':
+
+        return [
+            nn.Dropout(layer_description['rate'])
+        ]
+        
 """ Given the description of a network architecture (As specified in FILE_NAME), the function builds
     said network in pytorch
     Parameters:
