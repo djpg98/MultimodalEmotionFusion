@@ -29,8 +29,8 @@ architechture = sys.argv[2]
 iterations_start = int(sys.argv[3])
 iterations_end = int(sys.argv[4])
 
-if method not in METHOD_SCRIPTS.keys():
-    formated_method_list = ", ".join(METHOD_SCRIPTS.keys())
+if method not in METHOD_SCRIPTS:
+    formated_method_list = ", ".join(METHOD_SCRIPTS)
     print(f"Error: Selected fusion method does not exist. Try with one of the following: {formated_method_list}")
     sys.exit(-1)
 
