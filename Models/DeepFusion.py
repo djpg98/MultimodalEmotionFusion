@@ -87,7 +87,7 @@ class WeightedCombination(nn.Module):
             modality_results.append(weighted_modality_output)
             
         combination = torch.sum(torch.stack(modality_results), dim=0) #dim is right
-        reshaped_combination =  torch.stack(list(map(lambda y: torch.reshape(y, (1, len(input_list[i][0]))), combination)))
+        reshaped_combination =  torch.stack(list(map(lambda y: torch.reshape(y, (1, len(input_list[2][0]))), combination)))
         result, hidden_state = self.gru(reshaped_combination)
 
         return result

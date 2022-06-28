@@ -348,13 +348,13 @@ def exec_model(model, dataloader, loss_function=None, loss_list=None, acc_list=N
             else:
                 output_value = model(input_list)
 
-            if optimizer is not None:
-                loss.backward()
-                optimizer.step()
-
             if loss_function is not None:
                 loss = loss_function(output_value, expected_value)
                 sum_loss += loss.item()
+
+            if optimizer is not None:
+                loss.backward()
+                optimizer.step()
 
             correct += (torch.argmax(output_value, dim=1) == expected_value).float().sum().item()
             total += batch['face'].shape[0]
@@ -365,12 +365,13 @@ def exec_model(model, dataloader, loss_function=None, loss_list=None, acc_list=N
             if actual_output_list is not None:
                 actual_output_list += torch.argmax(output_value, dim=1).tolist()
 
-
-    loss = sum_loss / total
+    if loss_function is not None:
+        loss_value = sum_loss / total
+        
     acc = correct / total
 
     if loss_list is not None:
-        loss_list.append(loss)
+        loss_list.append(loss_value)
 
     if acc_list is not None:
         acc_list.append(acc)

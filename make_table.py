@@ -1,10 +1,24 @@
 import os
+import re
 import sys
 from os.path import join, exists
 
 import pandas as pd
 
 from Utils.table_utils import iterate_model_results, add_data, add_columns_mean
+
+"""
+INSTRUCTIONS
+    This script creates summary tables for each method's model's metrics. It saves the final results for
+    both training and validation (Test) for each method. For each model and dataset it includes the average, 
+    minimum, maximum values and variance of each metric through the models different training sessions. It 
+    produces one file for the training data and another one for the validation/test data
+    Arguments
+        - method: The method whose results will be summarized in the tables
+    Flags
+         - Omit modality flags: -nface (No face modality), -naudio (No audio modality), -ntext (No text modality) (Currently, 
+        only one modality can be omitted)
+"""
 
 METHOD_LIST = [
     'mlp_simple',
@@ -41,7 +55,28 @@ unweighted_metrics = [unweighted_loss_train, unweighted_acc_train, unweighted_lo
                       unweighted_f1_macro_train, unweighted_f1_weighted_train, unweighted_f1_macro_val, unweighted_f1_weighted_val]
 
 method = sys.argv[1]
-data_path = join('Results', method, 'Training Data')
+
+omit_modality = None
+
+if len(sys.argv) > 2:
+    #Check omit modality flags
+    flag_pattern = re.compile(r"-n\w+")
+    flag = flag_pattern.search(" ".join(list(map(lambda x: x.split()[0], sys.argv[2:]))))
+
+    if flag is not None and flag.group() in ["-nface", "-naudio", "-ntext"]:
+        omit_modality = flag.group()[2:]
+
+if omit_modality is not None:
+    base_results_dir = f'Results (No {omit_modality})'
+    base_tables_dir = f'Tables (No {omit_modality})'
+else:
+    base_results_dir = 'Results'
+    base_tables_dir = 'Tables'
+
+if not exists(base_tables_dir):
+    os.mkdir(base_tables_dir)
+
+data_path = join(base_results_dir, method, 'Training Data')
 
 encoded_path = os.fsencode(data_path)
 
@@ -117,7 +152,7 @@ for key, data in df_unweighted.items():
 
     df_unweighted[key] = add_columns_mean(df_unweighted[key])
 
-with pd.ExcelWriter(join('Tables', f'{method}_tables_train.xlsx')) as writer:
+with pd.ExcelWriter(join(base_tables_dir, f'{method}_tables_train.xlsx')) as writer:
 
     df_weighted['loss_train'].to_excel(writer, sheet_name='Weighted Loss Train')
     df_weighted['acc_train'].to_excel(writer, sheet_name='Weighted Acc Train')
@@ -129,7 +164,7 @@ with pd.ExcelWriter(join('Tables', f'{method}_tables_train.xlsx')) as writer:
     df_unweighted['f1_macro_train'].to_excel(writer, sheet_name='Unweighted F1 Macro Train')
     df_unweighted['f1_weighted_train'].to_excel(writer, sheet_name='Unweighted F1 Weighted Train')
 
-with pd.ExcelWriter(join('Tables', f'{method}_tables_val.xlsx')) as writer: 
+with pd.ExcelWriter(join(base_tables_dir, f'{method}_tables_val.xlsx')) as writer: 
 
     df_weighted['loss_val'].to_excel(writer, sheet_name='Weighted Loss Val')
     df_weighted['acc_val'].to_excel(writer, sheet_name='Weighted Acc Val')

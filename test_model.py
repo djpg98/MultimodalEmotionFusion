@@ -64,11 +64,12 @@ method = sys.argv[1]
 model_name = sys.argv[2]
 learning_rate = float(sys.argv[3])
 
+weight = False
+omit_modality = None
+
 if len(sys.argv) > 4:
     if "-w" in sys.argv[4:]:
         weight = True
-    else:
-        weight = False
 
     #Check omit modality flags
     flag_pattern = re.compile(r"-n\w+")
@@ -76,8 +77,6 @@ if len(sys.argv) > 4:
 
     if flag is not None and flag.group() in ["-nface", "-naudio", "-ntext"]:
         omit_modality = flag.group()[2:]
-    else: 
-        omit_modality = None
 
 if method not in METHOD_LIST:
     formated_method_list = ", ".join(METHOD_LIST)

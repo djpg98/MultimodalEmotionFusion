@@ -300,5 +300,128 @@ TENSORFUSION_ARCHITECTURES = {
         {
             'activation': 'softmax'
         } 
+    ],
+
+    'dropout_test' : [
+        {
+            'repeat': 1,
+            'in_features': 125,
+            'neurons': 128,
+            'activation': 'relu'
+        },
+
+        {
+            'activation': 'dropout',
+            'rate': 0.25
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 128,
+            'neurons': 128,
+            'activation': 'relu'
+        }, 
+
+        {
+            'repeat': 1,
+            'in_features': 128,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        } 
+    ],
+
+    '83-dropout25' : [
+        {
+            'repeat': 1,
+            'in_features': 125,
+            'neurons': 83,
+            'activation': 'relu'
+        },
+
+        {
+            'activation': 'dropout',
+            'rate': 0.25
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 83,
+            'neurons': 83,
+            'activation': 'relu'
+        }, 
+
+        {
+            'repeat': 1,
+            'in_features': 83,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        } 
+    ],
+
+        '83-dropout05' : [
+        {
+            'repeat': 1,
+            'in_features': 125,
+            'neurons': 83,
+            'activation': 'relu'
+        },
+
+        {
+            'activation': 'dropout',
+            'rate': 0.5
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 83,
+            'neurons': 83,
+            'activation': 'relu'
+        }, 
+
+        {
+            'repeat': 1,
+            'in_features': 83,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        } 
+    ],
+
+    '83-no-dropout' : [
+        {
+            'repeat': 1,
+            'in_features': 125,
+            'neurons': 83,
+            'activation': 'relu'
+        },
+
+        {
+            'repeat': 1,
+            'in_features': 83,
+            'neurons': 83,
+            'activation': 'relu'
+        }, 
+
+        {
+            'repeat': 1,
+            'in_features': 83,
+            'neurons': 4,
+            'activation': 'relu'
+        }, 
+        
+        {
+            'activation': 'softmax'
+        } 
     ]
 }
