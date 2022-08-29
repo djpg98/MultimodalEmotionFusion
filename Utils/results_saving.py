@@ -2,7 +2,8 @@ import csv
 import re
 from os.path import join
 
-from sklearn.metrics import classification_report
+import matplotlib.pyplot as plt
+from sklearn.metrics import classification_report, ConfusionMatrixDisplay, confusion_matrix
 
 IDENTIFIER_SEPARATOR = re.compile(r"adam_w|adam|lr_\d+_w|lr_\d+")
 
@@ -151,3 +152,40 @@ def save_f1(model_name, results_path, train_expected, train_output, test_expecte
                 report_file.write("TEST REPORT\n")
                 report_file.write(test_report)
                 report_file.write("\n\n")
+
+def save_confusion_matrix(model_name, results_path, train_expected, train_output, test_expected, test_output):
+
+    labels = ["Happiness", "Neutral", "Sadness", "Anger"]
+    header = []
+
+    name_sections = model_name.rpartition(IDENTIFIER_SEPARATOR.search(model_name).group())
+
+    if '_w' in name_sections[1]:
+        identifier_sections = name_sections[1].rpartition('_w')
+        prefix = name_sections[0] + identifier_sections[0]
+        suffix = identifier_sections[1] + name_sections[2]
+    else:
+        prefix  = name_sections[0] + name_sections[1]
+        suffix = name_sections[2]
+
+    train_file_name = prefix + "_train_cm" + suffix + ".png"
+
+    if len(train_expected) != 0:
+
+        cm = confusion_matrix(train_expected, train_output)
+        cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)#.from_predictions(train_expected, train_output, display_labels=labels)
+        figure = cm_display.plot()
+        plt.savefig(join(results_path, train_file_name))
+        plt.close()
+
+
+
+    test_file_name = prefix + "_test_cm" + suffix + ".png"
+
+    if len(test_expected) != 0:
+
+        cm = confusion_matrix(test_expected, test_output)
+        cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)#.from_predictions(train_expected, train_output, display_labels=labels)
+        figure = cm_display.plot()
+        plt.savefig(join(results_path, test_file_name))
+        plt.close()

@@ -12,7 +12,7 @@ from Models.Embracenet import Wrapper
 from Models.MLP import MLP
 from Models.TensorFusion import TensorFusion
 from Parameters.parameters import DEEP_FUSION_PARAMETERS
-from Utils.results_saving import save_f1, save_results_basic
+from Utils.results_saving import save_f1, save_results_basic, save_confusion_matrix
 from Utils.training_functions import exec_model
     
 def eval_f1(model, results_path, train_dataloader=None, test_dataloader=None, run_batch_cleaner=False, save_report=False):
@@ -58,6 +58,44 @@ def eval_f1(model, results_path, train_dataloader=None, test_dataloader=None, ru
             test_output=test_actual_output_list,
             save_report=save_report
         )
+
+def eval_confusion_matrix(model, results_path, train_dataloader=None, test_dataloader=None, run_batch_cleaner=False, save_report=False):
+
+        train_expected_output_list = []
+        train_actual_output_list = []
+
+        if train_dataloader is not None:
+
+            exec_model(
+                model=model,
+                dataloader=train_dataloader,
+                expected_output_list=train_expected_output_list,
+                actual_output_list=train_actual_output_list,
+                run_batch_cleaner=run_batch_cleaner
+            )
+
+        test_expected_output_list = []
+        test_actual_output_list = []
+
+        if test_dataloader is not None:
+
+            exec_model(
+                model=model,
+                dataloader=test_dataloader,
+                expected_output_list=test_expected_output_list,
+                actual_output_list=test_actual_output_list,
+                run_batch_cleaner=run_batch_cleaner
+            )
+
+        save_confusion_matrix(
+            model_name=model.name,
+            results_path=results_path,
+            train_expected=train_expected_output_list,
+            train_output=train_actual_output_list,
+            test_expected=test_expected_output_list,
+            test_output=test_actual_output_list,
+        )
+
 
 def eval_basics(model, results_path, train_dataloader=None, test_dataloader=None, run_batch_cleaner=False, weighted_loss_function=None, unweighted_loss_function=None, loss_parameters=None, save_report=False):
 
@@ -133,7 +171,8 @@ def iterate_models_get_metric(metric, encoded_iter_dir, path_to_dir, method, con
 
     available_metrics = {
         'F1': eval_f1,
-        'basics': eval_basics
+        'basics': eval_basics,
+        'confusion_matrix': eval_confusion_matrix
     }
 
     try:
@@ -200,7 +239,8 @@ def iterate_models_get_metric(metric, encoded_iter_dir, path_to_dir, method, con
                 cross_modality_activation=nn.ReLU()
             )
 
-            kwargs['kwargs']['loss_parameters'] = DEEP_FUSION_PARAMETERS[configuration]
+            if metric =='basics':
+                kwargs['kwargs']['loss_parameters'] = DEEP_FUSION_PARAMETERS[configuration]
 
         if method == 'weighted_combination':
 
@@ -258,7 +298,10 @@ def iterate_models_get_metric(metric, encoded_iter_dir, path_to_dir, method, con
 
         print(base_results_dir)
 
-        results_path = join(base_results_dir, method, 'Training Data', configuration, loss_type)
+        if metric ==  "confusion_matrix":
+            results_path = join(base_results_dir, method, 'Confusion Matrix', configuration, loss_type)
+        else:
+            results_path = join(base_results_dir, method, 'Training Data', configuration, loss_type)
 
         if not exists(results_path):
             os.makedirs(results_path)

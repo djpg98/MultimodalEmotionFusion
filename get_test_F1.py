@@ -45,6 +45,8 @@ metric_kwargs = {}
 method = sys.argv[1]
 metric = sys.argv[2]
 
+omit_modality = None
+
 if metric == "basics":
 
     metric_kwargs['unweighted_loss_function'] = nn.CrossEntropyLoss()
