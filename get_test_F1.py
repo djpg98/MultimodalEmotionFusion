@@ -20,7 +20,9 @@ METHOD_LIST = [
     'weighted_combination',
     'cross_modality',
     'tensorfusion',
-    'embracenet'
+    'embracenet',
+    'embracenet_plus',
+    'self_attention'
 ]
 
 """
@@ -83,7 +85,10 @@ with open(audio_data, 'rb') as dic:
 with open(text_data, 'rb') as dic:
     text_data = pickle.load(dic)
 
-BatchSize = 32
+if metric == "inference_time_cpu":
+    BatchSize = 1
+else:
+    BatchSize = 32
 
 train_dataset = DatasetIEMOCAP(classes, face_data, audi_data,
                                text_data, 'average',

@@ -2,9 +2,11 @@
 import torch
 import torch.nn as nn
 
+from Models.WeightedSum import WeightedSum
+
 "Based on the embracenet proposed by Jun-Ho Choi, Jong-Seok Lee (2019)"
 class EmbraceNet(nn.Module):
-	def __init__(self, device, input_size_list, embracement_size=256, bypass_docking=False):
+	def __init__(self, device, input_size_list, embracement_size=256, bypass_docking=False, additional_layer_size=0):
 		super(EmbraceNet, self).__init__()
 
 		self.device = device
@@ -13,7 +15,15 @@ class EmbraceNet(nn.Module):
 		self.bypass_docking = bypass_docking
 		if (not bypass_docking):
 			for i, input_size in enumerate(input_size_list):
-				setattr(self, 'docking_%d' % (i), nn.Linear(input_size, embracement_size))
+				if additional_layer_size > 0:
+					layers = [
+						nn.Linear(input_size, additional_layer_size),
+						nn.Dropout(),
+						nn.Linear(additional_layer_size, embracement_size),
+					]
+					setattr(self, 'docking_%d' % (i), nn.Sequential(*layers))
+				else:
+					setattr(self, 'docking_%d' % (i), nn.Linear(input_size, embracement_size))
 
 	def forward(self, input_list, availabilities=None, selection_probabilities=None):
 		# check input data
@@ -79,3 +89,44 @@ class Wrapper(nn.Module):
 		if self.classifier:
 			out = self.clf(out)
 		return out
+
+class EmbracenetPlus(nn.Module):
+
+	def __init__(self, name, device, additional_layer_size, n_classes=6, size_list=[6,6,6],
+				embracesize=100, bypass_docking=False) -> None:
+		super().__init__()
+
+		super(EmbracenetPlus, self).__init__()
+		self.name = name
+		self.embracenet_modalities = EmbraceNet(
+			device=device,
+			input_size_list=size_list, 
+			embracement_size=embracesize,
+			additional_layer_size=additional_layer_size
+		)
+		self.weighted_sum = WeightedSum(
+			device=device,
+			name="weighted_sum",
+			number_of_modes=len(size_list)
+		)
+		self.embracenet_methods = Wrapper(
+			name=f"{name}_classifier",
+			device=device,
+			n_classes=n_classes, 
+			size_list=[embracesize,size_list[0],sum(size_list)], 
+			embracesize=embracesize
+		)
+
+		self.methods_availabilites = torch.tensor([1., 1., 1.])
+
+	def forward(self, face, audio, text, availabilities):
+
+		input_list = [face, audio, text]
+
+		embracenet_results = self.embracenet_modalities(input_list, availabilities=availabilities)
+		weighted_sum_results = self.weighted_sum(input_list)
+		concat_modalities = torch.cat(input_list, dim=1)
+
+		results = self.embracenet_methods(embracenet_results, weighted_sum_results, concat_modalities, availabilities=self.methods_availabilites)
+
+		return results

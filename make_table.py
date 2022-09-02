@@ -27,7 +27,9 @@ METHOD_LIST = [
     'weighted_combination',
     'cross_modality',
     'tensorfusion',
-    'embracenet'
+    'embracenet',
+    'embracenet_plus',
+    'self_attention'
 ]
 
 weighted_loss_train = {'model': [], 'repetitions': [], 'avg': [], 'min': [], 'max': [], 'var': []}

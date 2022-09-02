@@ -8,12 +8,33 @@ import torch.nn as nn
 from Architectures.architectures import MLP_ARCHITECTURES, ATTENTION_MLP_ARCHITECTURES, TENSORFUSION_ARCHITECTURES
 from Models.Attention import AttentionMLP
 from Models.DeepFusion import DeepFusion, WeightedCombinationClassifier, CrossModalityClassifier
-from Models.Embracenet import Wrapper
+from Models.Embracenet import EmbracenetPlus, Wrapper
 from Models.MLP import MLP
+from Models.SelfAttention import SelfAttentionClassifier
 from Models.TensorFusion import TensorFusion
 from Parameters.parameters import DEEP_FUSION_PARAMETERS
-from Utils.results_saving import save_f1, save_results_basic, save_confusion_matrix
+from Utils.results_saving import save_f1, save_results_basic, save_confusion_matrix, save_time_report
+from Utils.time_recording import record_inference_time_cpu_only
 from Utils.training_functions import exec_model
+
+def eval_inference_time_cpu(model, results_path, train_dataloader=None, test_dataloader=None, run_batch_cleaner=False):
+
+    with torch.no_grad():
+
+        avg_time, min_time, max_time = record_inference_time_cpu_only(
+            model=model, 
+            train_dataloader=train_dataloader, 
+            test_dataloader=test_dataloader,
+            run_batch_cleaner=run_batch_cleaner
+        )
+
+        save_time_report(
+            model_name=model.name, 
+            results_path=results_path,
+            avg_time=avg_time,
+            min_time=min_time,
+            max_time=max_time
+        )
     
 def eval_f1(model, results_path, train_dataloader=None, test_dataloader=None, run_batch_cleaner=False, save_report=False):
 
@@ -172,7 +193,8 @@ def iterate_models_get_metric(metric, encoded_iter_dir, path_to_dir, method, con
     available_metrics = {
         'F1': eval_f1,
         'basics': eval_basics,
-        'confusion_matrix': eval_confusion_matrix
+        'confusion_matrix': eval_confusion_matrix,
+        'inference_time_cpu': eval_inference_time_cpu,
     }
 
     try:
@@ -280,6 +302,26 @@ def iterate_models_get_metric(metric, encoded_iter_dir, path_to_dir, method, con
                 embracesize=16
             )
 
+        if method == 'embracenet_plus':
+
+            model = EmbracenetPlus(
+                name=model_name,
+                device=device,
+                additional_layer_size=32,
+                n_classes=4,
+                size_list=[4, 4, 4],
+                embracesize=16
+            )
+
+        if method == "self_attention":
+
+            model = SelfAttentionClassifier(
+                device=device,
+                name=model_name,
+                modes=3,
+                modality_size=4
+            )
+
         print(file_path)
 
         model.load_state_dict(torch.load(file_path))
@@ -300,6 +342,8 @@ def iterate_models_get_metric(metric, encoded_iter_dir, path_to_dir, method, con
 
         if metric ==  "confusion_matrix":
             results_path = join(base_results_dir, method, 'Confusion Matrix', configuration, loss_type)
+        elif metric == "inference_time_cpu":
+            results_path = join(base_results_dir, method, 'Time CPU', configuration, loss_type)
         else:
             results_path = join(base_results_dir, method, 'Training Data', configuration, loss_type)
 

@@ -10,6 +10,8 @@ METHOD_SCRIPTS = [
     'cross_modality',
     'tensorfusion',
     'embracenet',
+    'embracenet_plus',
+    'self_attention'
 ]
 
 """

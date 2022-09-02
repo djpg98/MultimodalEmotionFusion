@@ -3,7 +3,7 @@ from tqdm.notebook import tqdm
 
 from Models.DeepFusion import DeepFusion
 from Models.MLP import MLP
-from Models.Embracenet import Wrapper 
+from Models.Embracenet import EmbracenetPlus, Wrapper 
 from Utils.results_saving import save_results
 
 """ Trains a MLP.
@@ -164,9 +164,7 @@ def train_deep_fusion(model, learning_rate, train_dataloader, epochs, loss_funct
                     expected_value = torch.argmax(batch['label'], dim=-1)
 
                     output_value, output_weighted_module, output_crossmodality = model(input_list)
-                    loss = loss_function(output_value, expected_value) 
-                    + loss_parameters["weighted_module"] * loss_function(output_weighted_module, expected_value)
-                    + loss_parameters["crossmodality"] * loss_function(output_crossmodality, expected_value)
+                    loss = loss_function(output_value, expected_value) + loss_parameters["weighted_module"] * loss_function(output_weighted_module, expected_value) + loss_parameters["crossmodality"] * loss_function(output_crossmodality, expected_value)
 
                     val_sum_loss += loss.item()
                     val_correct += (torch.argmax(output_value, dim=1) == expected_value).float().sum().item()
@@ -315,10 +313,12 @@ def exec_model(model, dataloader, loss_function=None, loss_list=None, acc_list=N
 
     if optimizer is None:
         model.eval()
+        is_train = False
     else:
+        is_train = True
         model.train()
 
-    with torch.no_grad():
+    with torch.set_grad_enabled(is_train):
 
         sum_loss = 0
         correct = 0
@@ -338,19 +338,19 @@ def exec_model(model, dataloader, loss_function=None, loss_list=None, acc_list=N
             if isinstance(model, DeepFusion):
                 output_value, output_weighted_module, output_crossmodality = model(input_list)
                 if loss_function is not None:
-                    loss = loss_function(output_value, expected_value) 
-                    + loss_parameters["weighted_module"] * loss_function(output_weighted_module, expected_value)
-                    + loss_parameters["crossmodality"] * loss_function(output_crossmodality, expected_value)
-            elif isinstance(model, Wrapper):
-                batch.pop('label')
-                batch.pop('name')
-                output_value = model(**batch)
+                    loss = loss_function(output_value, expected_value) + loss_parameters["weighted_module"] * loss_function(output_weighted_module, expected_value) + loss_parameters["crossmodality"] * loss_function(output_crossmodality, expected_value)
+                    sum_loss += loss.item()
             else:
-                output_value = model(input_list)
+                if isinstance(model, Wrapper) or isinstance(model, EmbracenetPlus):
+                    batch.pop('label')
+                    batch.pop('name')
+                    output_value = model(**batch)
+                else:
+                    output_value = model(input_list)
 
-            if loss_function is not None:
-                loss = loss_function(output_value, expected_value)
-                sum_loss += loss.item()
+                if loss_function is not None:
+                    loss = loss_function(output_value, expected_value)
+                    sum_loss += loss.item()
 
             if optimizer is not None:
                 loss.backward()

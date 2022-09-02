@@ -13,8 +13,9 @@ from Architectures.architectures import MLP_ARCHITECTURES, ATTENTION_MLP_ARCHITE
 from Datasets.IEMOCAP import DatasetIEMOCAP
 from Models.Attention import AttentionMLP
 from Models.DeepFusion import DeepFusion, WeightedCombinationClassifier, CrossModalityClassifier
-from Models.Embracenet import Wrapper
+from Models.Embracenet import EmbracenetPlus, Wrapper
 from Models.MLP import MLP
+from Models.SelfAttention import SelfAttentionClassifier
 from Models.TensorFusion import TensorFusion
 from Parameters.parameters import DEEP_FUSION_PARAMETERS
 from Utils.dataloaders import my_collate
@@ -38,7 +39,9 @@ METHOD_LIST = [
     'weighted_combination',
     'cross_modality',
     'tensorfusion',
-    'embracenet'
+    'embracenet',
+    'embracenet_plus',
+    'self_attention'
 ]
 
 ARCHITECTURES = {
@@ -197,6 +200,26 @@ elif method == "embracenet":
         embracesize=16
     )
 
+elif method == "embracenet_plus":
+
+    model = EmbracenetPlus(
+        name=model_name,
+        device=device,
+        additional_layer_size=32,
+        n_classes=4,
+        size_list=[4, 4, 4],
+        embracesize=16
+    )
+
+elif method == "self_attention":
+
+    model = SelfAttentionClassifier(
+        device=device,
+        name=model_name,
+        modes=3,
+        modality_size=4
+    )
+
 else:
 
     raise Exception("No method initializated")
@@ -205,8 +228,8 @@ optimizer = Adam(model.parameters())#SGD(model.parameters(), lr=learning_rate)
 
 if method == "deep_fusion":
     train_deep_fusion(model, learning_rate, train_dataloader, 200, loss_function, loss_parameters,optimizer, 'deep_fusion', test_dataloader)
-elif method == "embracenet":
-    train_embracenet(model, learning_rate, train_dataloader, 200, loss_function, optimizer, 'embracenet', test_dataloader)
+elif method == "embracenet" or method == "embracenet_plus":
+    train_embracenet(model, learning_rate, train_dataloader, 200, loss_function, optimizer, method, test_dataloader)
 else:
     train_mlp(model, learning_rate, train_dataloader, 200, loss_function, optimizer, method, test_dataloader)
 

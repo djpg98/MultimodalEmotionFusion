@@ -156,7 +156,6 @@ def save_f1(model_name, results_path, train_expected, train_output, test_expecte
 def save_confusion_matrix(model_name, results_path, train_expected, train_output, test_expected, test_output):
 
     labels = ["Happiness", "Neutral", "Sadness", "Anger"]
-    header = []
 
     name_sections = model_name.rpartition(IDENTIFIER_SEPARATOR.search(model_name).group())
 
@@ -178,8 +177,6 @@ def save_confusion_matrix(model_name, results_path, train_expected, train_output
         plt.savefig(join(results_path, train_file_name))
         plt.close()
 
-
-
     test_file_name = prefix + "_test_cm" + suffix + ".png"
 
     if len(test_expected) != 0:
@@ -189,3 +186,27 @@ def save_confusion_matrix(model_name, results_path, train_expected, train_output
         figure = cm_display.plot()
         plt.savefig(join(results_path, test_file_name))
         plt.close()
+
+def save_time_report(model_name, results_path, avg_time, min_time, max_time):
+
+    header = ['avg', 'min', 'max']
+
+    name_sections = model_name.rpartition(IDENTIFIER_SEPARATOR.search(model_name).group())
+
+    if '_w' in name_sections[1]:
+        identifier_sections = name_sections[1].rpartition('_w')
+        prefix = name_sections[0] + identifier_sections[0]
+        suffix = identifier_sections[1] + name_sections[2]
+    else:
+        prefix  = name_sections[0] + name_sections[1]
+        suffix = name_sections[2]
+
+    file_name = prefix + "_time_report" + suffix + ".csv"
+
+    with open(join(results_path, file_name), "w") as report_file:
+
+        writer = csv.writer(report_file, delimiter=",")
+        writer.writerow(header)
+        writer.writerow([avg_time, min_time, max_time])
+
+
