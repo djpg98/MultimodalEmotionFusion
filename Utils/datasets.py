@@ -4,6 +4,7 @@ import numpy as np
 import torch.nn.functional as F
 
 """ Esto lo saqué del código de JuanPablo
+JuanPablo Heredia (juan1t0 github)
 """
 class FusionTransformer(object):
   def __init__(self, modename):

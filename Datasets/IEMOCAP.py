@@ -4,7 +4,7 @@ import numpy as np
 import torch.nn.functional as F
 from torch.utils.data import Dataset
 
-#Esta clase es la que se utiliza para trabajar el dataset de IEMOCAP. La saqué del código de JuanPablo
+#Esta clase es la que se utiliza para trabajar el dataset de IEMOCAP. La saqué del código de JuanPablo Heredia (juan1t0 github)
 class DatasetIEMOCAP(Dataset):
     def __init__(self, classes, FaceR, AudioR, TextR, method='avg', mode='train', transform=None, omit_modality=None):
         super(DatasetIEMOCAP, self).__init__()

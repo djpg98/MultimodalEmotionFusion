@@ -6,6 +6,9 @@ from Models.MLP import MLP
 from Models.Embracenet import EmbracenetPlus, Wrapper 
 from Utils.results_saving import save_results
 
+""" This are based on JuanPablo Heredia (juan1t0 github) code for Embracenet training
+    but are customized and adapted by me"""
+
 """ Trains a MLP.
     Parameters:
         - model: Model to be trained (Must be a pytorch model)
@@ -134,9 +137,7 @@ def train_deep_fusion(model, learning_rate, train_dataloader, epochs, loss_funct
 
             optimizer.zero_grad()
             output_value, output_weighted_module, output_crossmodality = model(input_list)
-            loss = loss_function(output_value, expected_value) 
-            + loss_parameters["weighted_module"] * loss_function(output_weighted_module, expected_value)
-            + loss_parameters["crossmodality"] * loss_function(output_crossmodality, expected_value)
+            loss = loss_function(output_value, expected_value) + loss_parameters["weighted_module"] * loss_function(output_weighted_module, expected_value) + loss_parameters["crossmodality"] * loss_function(output_crossmodality, expected_value)
             loss.backward()
             optimizer.step()
 

@@ -1,4 +1,4 @@
-"Extracted from (CITE JUANPABLOS' GITHUB REPO)"
+"Extracted from https://github.com/juan1t0/multimodalDLforER JuanPablo Heredia (juan1t0 github)"
 import torch
 import torch.nn as nn
 
