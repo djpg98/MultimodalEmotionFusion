@@ -6,7 +6,7 @@ from Models.MLP import MLP
 from Models.Embracenet import EmbracenetPlus, Wrapper 
 from Utils.results_saving import save_results
 
-""" This are based on JuanPablo Heredia (juan1t0 github) code for Embracenet training
+""" These are based on JuanPablo Heredia (juan1t0 github) code for Embracenet training
     but are customized and adapted by me"""
 
 """ Trains a MLP.

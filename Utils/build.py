@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+""" The idea is from https://github.com/juan1t0/multimodalDLforER but the implementation and config structure is my own"""
 
 """ Given a layer's description (As specified in FILE NAME), the function builds said layer in
     pytorch
